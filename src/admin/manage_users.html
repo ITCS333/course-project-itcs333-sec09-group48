@@ -45,7 +45,7 @@
             <h2>Change Your Password</h2>
 
             <!-- TODO: Create a 'form' for changing the password. The 'action' can be '#'. -->
-            <form action="#">
+            <form id="password-form" action="#">
 
                 <!-- TODO: Use a 'fieldset' to group the password-related fields. -->
                 <fieldset>
@@ -111,7 +111,7 @@
                 <summary>Add New Student</summary>
 
                 <!-- TODO: Create a 'form' for adding a new student. 'action' can be '#'. -->
-                <form action="#">
+                <form id="add-student-form" action="#">
 
                     <!-- TODO: Use a 'fieldset' to group the new student fields. -->
                     <fieldset>
@@ -170,6 +170,8 @@
             <!-- TODO: Add a sub-heading (e.g., 'h3') for the list of students, "Registered Students". -->
             <h3>Registered Students</h3>
 
+            <label for="search-input">Search Students:</label>
+            <input type="text" id="search-input" placeholder="Search by name...">
             <!-- TODO: Create a 'table' to display the list of students. Give it an id="student-table". -->
             <table id="student-table">
 
