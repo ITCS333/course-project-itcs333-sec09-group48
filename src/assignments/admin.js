@@ -10,6 +10,7 @@
   
   3. Implement the TODOs below.
 */
+<script src="admin.js" defer></script>
 
 // --- Global Data Store ---
 // This will hold the assignments loaded from the JSON file.
@@ -17,8 +18,10 @@ let assignments = [];
 
 // --- Element Selections ---
 // TODO: Select the assignment form ('#assignment-form').
+const assignmentForm = document.getElementById('assignment-form');
 
 // TODO: Select the assignments table body ('#assignments-tbody').
+const assignmentsTableBody = document.getElementById('assignments-tbody');
 
 // --- Functions ---
 
@@ -33,7 +36,39 @@ let assignments = [];
  * - A "Delete" button with class "delete-btn" and `data-id="${id}"`.
  */
 function createAssignmentRow(assignment) {
-  // ... your implementation here ...
+  const { id, title, dueDate } = assignment;
+
+  const tr = document.createElement('tr');
+
+  // Title cell
+  const titleTd = document.createElement('td');
+  titleTd.textContent = title;
+  tr.appendChild(titleTd);
+
+  // Due date cell
+  const dueTd = document.createElement('td');
+  dueTd.textContent = dueDate;
+  tr.appendChild(dueTd);
+
+  // Actions cell with buttons
+  const actionsTd = document.createElement('td');
+
+  const editBtn = document.createElement('button');
+  editBtn.type = 'button';
+  editBtn.className = 'edit-btn';
+  editBtn.dataset.id = id;
+  editBtn.textContent = 'Edit';
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.type = 'button';
+  deleteBtn.className = 'delete-btn';
+  deleteBtn.dataset.id = id;
+  deleteBtn.textContent = 'Delete';
+
+  actionsTd.append(editBtn, deleteBtn); // Using append for multiple elements (instead of appendChild)
+  tr.appendChild(actionsTd);
+
+  return tr;
 }
 
 /**
