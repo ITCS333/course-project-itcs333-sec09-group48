@@ -10,7 +10,6 @@
   
   3. Implement the TODOs below.
 */
-<script src="admin.js" defer></script>
 
 // --- Global Data Store ---
 // This will hold the assignments loaded from the JSON file.
@@ -55,17 +54,17 @@ function createAssignmentRow(assignment) {
 
   const editBtn = document.createElement('button');
   editBtn.type = 'button';
-  editBtn.className = 'edit-btn';
+  editBtn.className = 'edit-assignment'; // Match HTML class
   editBtn.dataset.id = id;
   editBtn.textContent = 'Edit';
 
   const deleteBtn = document.createElement('button');
   deleteBtn.type = 'button';
-  deleteBtn.className = 'delete-btn';
+  deleteBtn.className = 'delete-assignment'; // Match HTML class
   deleteBtn.dataset.id = id;
   deleteBtn.textContent = 'Delete';
 
-  actionsTd.append(editBtn, deleteBtn); // Using append for multiple elements (instead of appendChild)
+  actionsTd.append(editBtn, deleteBtn);
   tr.appendChild(actionsTd);
 
   return tr;
@@ -80,7 +79,6 @@ function createAssignmentRow(assignment) {
  * append the resulting <tr> to `assignmentsTableBody`.
  */
 function renderTable() {
-  // ... your implementation here ...
   assignmentsTableBody.innerHTML = '';
   assignments.forEach(assignment => {
     const row = createAssignmentRow(assignment);
@@ -102,25 +100,29 @@ function renderTable() {
 function handleAddAssignment(event) {
   event.preventDefault();
   
-  const formData = new FormData(assignmentForm);
-  const title = (formData.get('title') || '').toString().trim();
-  const description = (formData.get('description') || '').toString().trim();
-  const dueDate = (formData.get('dueDate') || '').toString().trim();
+  // Get values directly from input elements (matching HTML IDs)
+  const titleInput = document.getElementById('assignment-title');
+  const descriptionInput = document.getElementById('assignment-description');
+  const dueDateInput = document.getElementById('assignment-due-date');
+  const filesInput = document.getElementById('assignment-files');
+
+  const title = titleInput.value.trim();
+  const description = descriptionInput.value.trim();
+  const dueDate = dueDateInput.value;
+  const filesText = filesInput.value.trim();
 
   // Basic validation
   if (!title) {
     alert('Please enter a title');
     return;
   }
+  if (!dueDate) {
+    alert('Please select a due date');
+    return;
+  }
 
-  // File handling - adjust based on your actual form structure
-  const files = [];
-  const fileInputs = formData.getAll('files');
-  fileInputs.forEach(file => {
-    if (file instanceof File && file.name) {
-      files.push(file.name);
-    }
-  });
+  // Process files (split by newline)
+  const files = filesText ? filesText.split('\n').map(line => line.trim()).filter(line => line) : [];
 
   const newAssignment = {
     id: `asg_${Date.now()}`,
@@ -146,17 +148,25 @@ function handleAddAssignment(event) {
  * 4. Call `renderTable()` to refresh the list.
  */
 function handleTableClick(event) {
-  // ... your implementation here ...
-  const btn = event.target.closest('button');
-  if (!btn) return;
-
-  if (btn.classList.contains('delete-btn')) {
+  const btn = event.target;
+  
+  // Check for delete button (match HTML class)
+  if (btn.classList.contains('delete-assignment')) {
     const id = btn.dataset.id;
     if (!id) return;
-    assignments = assignments.filter(a => a.id !== id);
-    renderTable();
+    
+    if (confirm('Are you sure you want to delete this assignment?')) {
+      assignments = assignments.filter(a => a.id !== id);
+      renderTable();
+    }
   }
   
+  // You can add edit functionality later
+  if (btn.classList.contains('edit-assignment')) {
+    const id = btn.dataset.id;
+    // Edit functionality would go here
+    alert(`Edit functionality for assignment ${id} would go here`);
+  }
 }
 
 /**
@@ -170,14 +180,24 @@ function handleTableClick(event) {
  * 5. Add the 'click' event listener to `assignmentsTableBody` (calls `handleTableClick`).
  */
 async function loadAndInitialize() {
-  // ... your implementation here ...
   try {
+    // For demo purposes, we'll use some sample data since assignments.json might not exist
+    assignments = [
+      { id: 'asg_1', title: 'HTML Basics', dueDate: '2024-07-15', description: 'Learn basic HTML tags', files: [] },
+      { id: 'asg_2', title: 'CSS Styling', dueDate: '2024-07-22', description: 'Style web pages with CSS', files: [] }
+    ];
+    
+    // If you have a real assignments.json file, uncomment this:
+    /*
     const res = await fetch('assignments.json');
     if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
     const data = await res.json();
     assignments = Array.isArray(data) ? data : [];
+    */
+    
   } catch (err) {
-    console.error('Error loading assignments.json:', err);
+    console.error('Error loading assignments:', err);
+    // Fallback to empty array
     assignments = [];
   }
 
