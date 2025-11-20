@@ -10,6 +10,7 @@
   
   3. Implement the TODOs below.
 */
+<script src="admin.js" defer></script>
 
 // --- Global Data Store ---
 // This will hold the assignments loaded from the JSON file.
@@ -17,8 +18,10 @@ let assignments = [];
 
 // --- Element Selections ---
 // TODO: Select the assignment form ('#assignment-form').
+const assignmentForm = document.getElementById('assignment-form');
 
 // TODO: Select the assignments table body ('#assignments-tbody').
+const assignmentsTableBody = document.getElementById('assignments-tbody');
 
 // --- Functions ---
 
@@ -33,7 +36,39 @@ let assignments = [];
  * - A "Delete" button with class "delete-btn" and `data-id="${id}"`.
  */
 function createAssignmentRow(assignment) {
-  // ... your implementation here ...
+  const { id, title, dueDate } = assignment;
+
+  const tr = document.createElement('tr');
+
+  // Title cell
+  const titleTd = document.createElement('td');
+  titleTd.textContent = title;
+  tr.appendChild(titleTd);
+
+  // Due date cell
+  const dueTd = document.createElement('td');
+  dueTd.textContent = dueDate;
+  tr.appendChild(dueTd);
+
+  // Actions cell with buttons
+  const actionsTd = document.createElement('td');
+
+  const editBtn = document.createElement('button');
+  editBtn.type = 'button';
+  editBtn.className = 'edit-btn';
+  editBtn.dataset.id = id;
+  editBtn.textContent = 'Edit';
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.type = 'button';
+  deleteBtn.className = 'delete-btn';
+  deleteBtn.dataset.id = id;
+  deleteBtn.textContent = 'Delete';
+
+  actionsTd.append(editBtn, deleteBtn); // Using append for multiple elements (instead of appendChild)
+  tr.appendChild(actionsTd);
+
+  return tr;
 }
 
 /**
@@ -46,6 +81,11 @@ function createAssignmentRow(assignment) {
  */
 function renderTable() {
   // ... your implementation here ...
+  assignmentsTableBody.innerHTML = '';
+  assignments.forEach(assignment => {
+    const row = createAssignmentRow(assignment);
+    assignmentsTableBody.appendChild(row);
+  });
 }
 
 /**
@@ -60,7 +100,39 @@ function renderTable() {
  * 6. Reset the form.
  */
 function handleAddAssignment(event) {
-  // ... your implementation here ...
+  event.preventDefault();
+  
+  const formData = new FormData(assignmentForm);
+  const title = (formData.get('title') || '').toString().trim();
+  const description = (formData.get('description') || '').toString().trim();
+  const dueDate = (formData.get('dueDate') || '').toString().trim();
+
+  // Basic validation
+  if (!title) {
+    alert('Please enter a title');
+    return;
+  }
+
+  // File handling - adjust based on your actual form structure
+  const files = [];
+  const fileInputs = formData.getAll('files');
+  fileInputs.forEach(file => {
+    if (file instanceof File && file.name) {
+      files.push(file.name);
+    }
+  });
+
+  const newAssignment = {
+    id: `asg_${Date.now()}`,
+    title,
+    description,
+    dueDate,
+    files
+  };
+
+  assignments.push(newAssignment);
+  renderTable();
+  assignmentForm.reset();
 }
 
 /**
@@ -75,6 +147,16 @@ function handleAddAssignment(event) {
  */
 function handleTableClick(event) {
   // ... your implementation here ...
+  const btn = event.target.closest('button');
+  if (!btn) return;
+
+  if (btn.classList.contains('delete-btn')) {
+    const id = btn.dataset.id;
+    if (!id) return;
+    assignments = assignments.filter(a => a.id !== id);
+    renderTable();
+  }
+  
 }
 
 /**
@@ -89,6 +171,24 @@ function handleTableClick(event) {
  */
 async function loadAndInitialize() {
   // ... your implementation here ...
+  try {
+    const res = await fetch('assignments.json');
+    if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+    const data = await res.json();
+    assignments = Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error('Error loading assignments.json:', err);
+    assignments = [];
+  }
+
+  renderTable();
+
+  if (assignmentForm) {
+    assignmentForm.addEventListener('submit', handleAddAssignment);
+  }
+  if (assignmentsTableBody) {
+    assignmentsTableBody.addEventListener('click', handleTableClick);
+  }
 }
 
 // --- Initial Page Load ---
