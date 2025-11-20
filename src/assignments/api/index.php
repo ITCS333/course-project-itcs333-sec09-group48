@@ -40,7 +40,7 @@
 // ============================================================================
 
 // TODO: Set Content-Type header to application/json
-
+header('Content-Type: application/json; charset=utf-8');
 
 // TODO: Set CORS headers to allow cross-origin requests
 
@@ -222,7 +222,7 @@ function createAssignment($db, $data) {
  */
 function updateAssignment($db, $data) {
     // TODO: Validate that 'id' is provided in $data
-    
+
     
     // TODO: Store assignment ID in variable
     
