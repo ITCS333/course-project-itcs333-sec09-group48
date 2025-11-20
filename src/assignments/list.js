@@ -25,6 +25,23 @@
  */
 function createAssignmentArticle(assignment) {
   // ... your implementation here ...
+  const { id, title, dueDate, description } = assignment;
+
+  const article = document.createElement('article');
+  const h2 = document.createElement('h2');
+  h2.textContent = title;
+  article.appendChild(h2);
+  const dueP = document.createElement('p');
+  dueP.textContent = `Due: ${dueDate}`;
+  article.appendChild(dueP);
+  const descP = document.createElement('p');
+  descP.textContent = description;
+  article.appendChild(descP);
+  const detailsLink = document.createElement('a');
+  detailsLink.href = `details.html?id=${id}`;
+  detailsLink.textContent = 'View Details';
+  article.appendChild(detailsLink);
+  return article;
 }
 
 /**
@@ -40,6 +57,13 @@ function createAssignmentArticle(assignment) {
  */
 async function loadAssignments() {
   // ... your implementation here ...
+  const response = await fetch('assignments.json');
+  const assignments = await response.json();
+  listSection.innerHTML = '';
+  assignments.forEach(assignment => {
+    const article = createAssignmentArticle(assignment);
+    listSection.appendChild(article);
+  });
 }
 
 // --- Initial Page Load ---
