@@ -516,17 +516,30 @@ function sendResponse($data, $statusCode = 200) {
  * @return string - Sanitized data
  */
 function sanitizeInput($data) {
-    // TODO: Trim whitespace from beginning and end
-    
-    
-    // TODO: Remove HTML and PHP tags
-    
-    
-    // TODO: Convert special characters to HTML entities
-    
-    
-    // TODO: Return the sanitized data
-    
+    // If data is not a string, convert to string or return empty string
+    if ($data === null) {
+        return '';
+    }
+    if (!is_string($data)) {
+        // Attempt to convert scalars to string safely, otherwise return empty string
+        if (is_scalar($data)) {
+            $data = (string)$data;
+        } else {
+            return '';
+        }
+    }
+
+    // Trim whitespace from beginning and end
+    $data = trim($data);
+
+    // Remove HTML and PHP tags
+    $data = strip_tags($data);
+
+    // Convert special characters to HTML entities (preserve UTF-8 and both quotes)
+    $data = htmlspecialchars($data, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
+    // Return the sanitized data
+    return $data;
 }
 
 
@@ -537,11 +550,32 @@ function sanitizeInput($data) {
  * @return bool - True if valid, false otherwise
  */
 function validateDate($date) {
-    // TODO: Use DateTime::createFromFormat to validate
-    
-    
-    // TODO: Return true if valid, false otherwise
-    
+    // Reject null or non-scalar values early
+    if ($date === null) {
+        return false;
+    }
+    if (!is_string($date)) {
+        if (is_scalar($date)) {
+            $date = (string)$date;
+        } else {
+            return false;
+        }
+    }
+
+    // Trim and ensure non-empty
+    $date = trim($date);
+    if ($date === '') {
+        return false;
+    }
+
+    // Use DateTime to validate the format strictly
+    $d = DateTime::createFromFormat('Y-m-d', $date);
+    if ($d === false) {
+        return false;
+    }
+
+    // Ensure the input exactly matches the canonical Y-m-d representation
+    return $d->format('Y-m-d') === $date;
 }
 
 
@@ -553,11 +587,18 @@ function validateDate($date) {
  * @return bool - True if valid, false otherwise
  */
 function validateAllowedValue($value, $allowedValues) {
-    // TODO: Check if $value exists in $allowedValues array
-    
-    
-    // TODO: Return the result
-    
+    // Ensure $allowedValues is an array with at least one element
+    if (!is_array($allowedValues) || empty($allowedValues)) {
+        return false;
+    }
+
+    // If value is null, consider it invalid
+    if ($value === null) {
+        return false;
+    }
+
+    // Use strict comparison to avoid type-coercion issues
+    return in_array($value, $allowedValues, true);
 }
 
 ?>
