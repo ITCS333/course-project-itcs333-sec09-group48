@@ -304,3 +304,18 @@ body.dark-mode .dark-mode-btn {
     background: rgba(0, 0, 0, 0.3);
     border-color: rgba(255, 255, 255, 0.2);
 }
+
+td .buttons-container {
+    display: flex;
+    gap: 8px;
+}
+
+td {
+    white-space: nowrap;
+}
+
+td button {
+    display: inline-block;
+    margin: 0 5px;
+}
+

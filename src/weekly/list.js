@@ -13,6 +13,7 @@
 
 // --- Element Selections ---
 // TODO: Select the section for the week list ('#week-list-section').
+const listSection = document.querySelector('#week-list-section');
 
 // --- Functions ---
 
@@ -25,6 +26,31 @@
  */
 function createWeekArticle(week) {
   // ... your implementation here ...
+    const article = document.createElement('article');
+  
+  // Create and append title (h2)
+  const title = document.createElement('h2');
+  title.textContent = week.title;
+  article.appendChild(title);
+  
+  // Create and append start date (p)
+  const startDate = document.createElement('p');
+  startDate.textContent = `Starts on: ${week.startDate}`;
+  article.appendChild(startDate);
+  
+  // Create and append description (p)
+  const description = document.createElement('p');
+  description.textContent = week.description;
+  article.appendChild(description);
+  
+  // Create and append "View Details & Discussion" link
+  const link = document.createElement('a');
+  link.href = `details.html?id=${week.id}`;
+  link.textContent = 'View Details & Discussion';
+  link.className = 'week-link'; // Optional: add a class for styling
+  article.appendChild(link);
+  
+  return article;
 }
 
 /**
@@ -40,6 +66,31 @@ function createWeekArticle(week) {
  */
 async function loadWeeks() {
   // ... your implementation here ...
+    try {
+    // Fetch data from weeks.json
+    const response = await fetch('weeks.json');
+    
+    if (!response.ok) {
+      throw new Error(`Failed to load weeks data: ${response.status}`);
+    }
+    
+    // Parse JSON response
+    const weeks = await response.json();
+    
+    // Clear existing content
+    listSection.innerHTML = '';
+    
+    // Loop through weeks and create articles
+    weeks.forEach(week => {
+      const article = createWeekArticle(week);
+      listSection.appendChild(article);
+    });
+    
+  } catch (error) {
+    console.error('Error loading weeks:', error);
+    // Display error message to user
+    listSection.innerHTML = '<p>Sorry, there was an error loading the weekly breakdown. Please try again later.</p>';
+  }
 }
 
 // --- Initial Page Load ---

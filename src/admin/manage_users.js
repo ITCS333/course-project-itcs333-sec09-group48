@@ -62,19 +62,26 @@ function createStudentRow(student) {
   emailCell.textContent = student.email;
 
   const actionCell = document.createElement('td');
+  
+  const buttonsContainer = document.createElement('div');
+  buttonsContainer.className = 'buttons-container';
 
-  const editButton = document.createElement('button');
-  editButton.textContent = 'Edit';
-  editButton.className = 'edit-btn';
-  editButton.setAttribute('data-id', student.id);
+  const editBtn = document.createElement('button');
+  editBtn.type = 'button';
+  editBtn.className = 'edit-btn';
+  editBtn.dataset.id = student.id; 
+  editBtn.textContent = 'Edit';
 
-  const deleteButton = document.createElement('button');
-  deleteButton.textContent = 'Delete';
-  deleteButton.className = 'delete-btn';
-  deleteButton.setAttribute('data-id', student.id);
+  const deleteBtn = document.createElement('button');
+  deleteBtn.type = 'button';
+  deleteBtn.className = 'delete-btn';
+  deleteBtn.dataset.id = student.id; 
+  deleteBtn.textContent = 'Delete';
 
-  actionCell.appendChild(editButton);
-  actionCell.appendChild(deleteButton);
+  buttonsContainer.appendChild(editBtn);
+  buttonsContainer.appendChild(deleteBtn);
+
+  actionCell.appendChild(buttonsContainer);
 
   row.appendChild(nameCell);
   row.appendChild(idCell);
@@ -199,7 +206,6 @@ function handleTableClick(event) {
 
     if (confirm('Are you sure you want to delete this student?')) {
       students = students.filter(student => student.id !== studentId);
-
       renderTable(students);
     }
   } else if (target.classList.contains('edit-btn')) {
@@ -207,8 +213,15 @@ function handleTableClick(event) {
     const student = students.find(s => s.id === studentId);
 
     if (student) {
-      alert(`Edit student:\nName: ${student.name}\nID: ${student.id}\nEmail: ${student.email}`);
-    }
+      const newName = prompt('Enter new name:', student.name);
+      const newEmail = prompt('Enter new email:', student.email);
+
+      if (newName && newEmail) {
+        student.name = newName;
+        student.email = newEmail;
+        renderTable(students);
+      } 
+    } 
   }
 }
 
