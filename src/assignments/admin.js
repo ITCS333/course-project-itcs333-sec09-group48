@@ -35,6 +35,10 @@ const assignmentsTableBody = document.getElementById('assignments-tbody');
  * - A "Delete" button with class "delete-btn" and `data-id="${id}"`.
  */
 function createAssignmentRow(assignment) {
+  //alerts
+  alert(`createAssignmentRow called for: ${assignment.title}`);
+
+
   const { id, title, dueDate } = assignment;
 
   const tr = document.createElement('tr');
@@ -79,6 +83,9 @@ function createAssignmentRow(assignment) {
  * append the resulting <tr> to `assignmentsTableBody`.
  */
 function renderTable() {
+  //alerts
+   alert(`renderTable called. Number of assignments: ${assignments.length}`);
+
   assignmentsTableBody.innerHTML = '';
   assignments.forEach(assignment => {
     const row = createAssignmentRow(assignment);
@@ -99,12 +106,17 @@ function renderTable() {
  */
 function handleAddAssignment(event) {
   event.preventDefault();
+  //alerts
+  alert('handleAddAssignment called');
   
   // Get values directly from input elements (matching HTML IDs)
   const titleInput = document.getElementById('assignment-title');
   const descriptionInput = document.getElementById('assignment-description');
   const dueDateInput = document.getElementById('assignment-due-date');
   const filesInput = document.getElementById('assignment-files');
+
+  //alerts
+  alert(`Input values - Title: ${title}, Due: ${dueDate}, Description: ${description}`);
 
   const title = titleInput.value.trim();
   const description = descriptionInput.value.trim();
@@ -149,9 +161,16 @@ function handleAddAssignment(event) {
  */
 function handleTableClick(event) {
   const btn = event.target;
+
+  //alerts
+  alert(`handleTableClick called on element: ${btn.tagName}, class: ${btn.className}`);
   
   // DELETE
   if (btn.classList.contains('delete-assignment')) {
+    //alerts
+    alert(`Deleting assignment with id: ${btn.dataset.id}`);
+
+
     let id = btn.dataset.id;
 
     // If button has no data-id (HTML dummy row)
@@ -167,6 +186,9 @@ function handleTableClick(event) {
   
   // EDIT item (not implemented, just alert)
   if (btn.classList.contains('edit-assignment')) {
+    //alerts
+    alert(`Edit clicked for assignment id: ${btn.dataset.id}`);
+
     let id = btn.dataset.id;
 
     if (!id) {
@@ -190,12 +212,18 @@ function handleTableClick(event) {
  * 5. Add the 'click' event listener to `assignmentsTableBody` (calls `handleTableClick`).
  */
 async function loadAndInitialize() {
+  //alerts
+  alert('loadAndInitialize called');
+
   try {
     // For demo purposes, we'll use some sample data since assignments.json might not exist
     assignments = [
       { id: 'asg_1', title: 'HTML Basics', dueDate: '2024-07-15', description: 'Learn basic HTML tags', files: [] },
       { id: 'asg_2', title: 'CSS Styling', dueDate: '2024-07-22', description: 'Style web pages with CSS', files: [] }
     ];
+
+    //alerts
+    alert(`Sample assignments loaded: ${assignments.map(a => a.title).join(', ')}`);
     
     // If you have a real assignments.json file, uncomment this:
     /*
