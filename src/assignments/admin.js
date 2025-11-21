@@ -150,24 +150,34 @@ function handleAddAssignment(event) {
 function handleTableClick(event) {
   const btn = event.target;
   
-  // Check for delete button (match HTML class)
+  // DELETE
   if (btn.classList.contains('delete-assignment')) {
-    const id = btn.dataset.id;
-    if (!id) return;
-    
-    if (confirm('Are you sure you want to delete this assignment?')) {
-      assignments = assignments.filter(a => a.id !== id);
-      renderTable();
+    let id = btn.dataset.id;
+
+    // If button has no data-id (HTML dummy row)
+    if (!id) {
+      const row = btn.closest('tr');
+      if (row) row.remove();
+      return;
     }
+
+    assignments = assignments.filter(a => a.id !== id);
+    renderTable();
   }
   
-  // You can add edit functionality later
+  // EDIT item (not implemented, just alert)
   if (btn.classList.contains('edit-assignment')) {
-    const id = btn.dataset.id;
-    // Edit functionality would go here
+    let id = btn.dataset.id;
+
+    if (!id) {
+      alert("This static HTML row cannot be edited.");
+      return;
+    }
+
     alert(`Edit functionality for assignment ${id} would go here`);
   }
 }
+
 
 /**
  * TODO: Implement the loadAndInitialize function.
