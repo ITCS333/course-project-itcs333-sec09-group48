@@ -25,6 +25,14 @@ let currentComments = [];
 // --- Element Selections ---
 // TODO: Select all the elements you added IDs for in step 2.
 
+const assignmentTitle = document.getElementById('assignment-title');
+const assignmentDueDate = document.getElementById('assignment-due-date');
+const assignmentDescription = document.getElementById('assignment-description'); // Fixed typo: removed space
+const assignmentFilesList = document.getElementById('assignment-files-list');
+const commentList = document.getElementById('comment-list');
+const commentForm = document.getElementById('comment-form');
+const newCommentText = document.getElementById('new-comment-text');
+
 // --- Functions ---
 
 /**
@@ -35,7 +43,9 @@ let currentComments = [];
  * 3. Return the id.
  */
 function getAssignmentIdFromURL() {
-  // ... your implementation here ...
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  return urlParams.get('id');
 }
 
 /**
@@ -49,7 +59,51 @@ function getAssignmentIdFromURL() {
  * `<li><a href="#">...</a></li>` for each file in the assignment's 'files' array.
  */
 function renderAssignmentDetails(assignment) {
-  // ... your implementation here ...
+  // Set basic assignment information
+  assignmentTitle.textContent = assignment.title;
+  assignmentDueDate.textContent = `Due: ${assignment.dueDate}`;
+  assignmentDescription.textContent = assignment.description;
+  
+  // Clear and rebuild files list
+  assignmentFilesList.innerHTML = '';
+  
+  // Handle case where there are no files
+  if (!assignment.files || assignment.files.length === 0) {
+    const li = document.createElement('li');
+    li.textContent = 'No files attached';
+    li.className = 'no-files';
+    assignmentFilesList.appendChild(li);
+    return;
+  }
+  
+  // Create file list items - handle both string format and object format
+  assignment.files.forEach(file => {
+    const li = document.createElement('li');
+    
+    // Handle different file formats:
+    // - If file is a string (from your HTML form), treat it as URL
+    // - If file is an object with url/name properties, use those
+    if (typeof file === 'string') {
+      const a = document.createElement('a');
+      a.href = file.startsWith('http') ? file : `#${file}`;
+      a.textContent = file;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      li.appendChild(a);
+    } else if (file.url) {
+      const a = document.createElement('a');
+      a.href = file.url;
+      a.textContent = file.name || file.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      li.appendChild(a);
+    } else {
+      // Fallback: just display as text
+      li.textContent = file;
+    }
+    
+    assignmentFilesList.appendChild(li);
+  });
 }
 
 /**
@@ -58,7 +112,24 @@ function renderAssignmentDetails(assignment) {
  * It should return an <article> element matching the structure in `details.html`.
  */
 function createCommentArticle(comment) {
-  // ... your implementation here ...
+  const { author, text } = comment;
+
+  // Create elements
+  const article = document.createElement('article');
+  const authorP = document.createElement('p');
+  const textP = document.createElement('p');
+  
+  // Set attributes and content
+  article.className = 'comment';
+  authorP.className = 'comment-author';
+  authorP.textContent = author;
+  textP.className = 'comment-text';
+  textP.textContent = text;
+  
+  // Build structure
+  article.append(authorP, textP);
+  
+  return article;
 }
 
 /**
@@ -70,7 +141,21 @@ function createCommentArticle(comment) {
  * append the resulting <article> to `commentList`.
  */
 function renderComments() {
-  // ... your implementation here ...
+  commentList.innerHTML = '';
+  
+  // Handle case where there are no comments
+  if (!currentComments || currentComments.length === 0) {
+    const noCommentsMsg = document.createElement('p');
+    noCommentsMsg.textContent = 'No comments yet. Be the first to comment!';
+    noCommentsMsg.className = 'no-comments';
+    commentList.appendChild(noCommentsMsg);
+    return;
+  }
+  
+  currentComments.forEach(comment => {
+    const commentArticle = createCommentArticle(comment);
+    commentList.appendChild(commentArticle);
+  });
 }
 
 /**
@@ -87,7 +172,19 @@ function renderComments() {
  * 7. Clear the `newCommentText` textarea.
  */
 function handleAddComment(event) {
-  // ... your implementation here ...
+  event.preventDefault();
+  const commentText = newCommentText.value.trim();
+  if (commentText === '') return;
+  
+  const newComment = {
+    author: 'Student', 
+    text: commentText,
+    timestamp: new Date().toISOString() // Optional: add timestamp
+  };
+  
+  currentComments.push(newComment);
+  renderComments();
+  newCommentText.value = '';
 }
 
 /**
@@ -107,7 +204,81 @@ function handleAddComment(event) {
  * 7. If the assignment is not found, display an error.
  */
 async function initializePage() {
-  // ... your implementation here ...
+  currentAssignmentId = getAssignmentIdFromURL();
+  
+  if (!currentAssignmentId) {
+    assignmentTitle.textContent = 'Error: No assignment ID provided in URL.';
+    return;
+  }
+  
+  try {
+    // For demo purposes, use sample data if JSON files don't exist
+    let assignments = [];
+    let commentsData = {};
+    
+    try {
+      const [assignmentsRes, commentsRes] = await Promise.all([
+        fetch('assignments.json'),
+        fetch('comments.json')
+      ]);
+      
+      if (assignmentsRes.ok) {
+        assignments = await assignmentsRes.json();
+      }
+      
+      if (commentsRes.ok) {
+        commentsData = await commentsRes.json();
+      }
+    } catch (fetchError) {
+      console.warn('Could not load JSON files, using sample data:', fetchError);
+      // Fallback to sample data
+      assignments = [
+        { 
+          id: 'asg_1', 
+          title: 'HTML Basics', 
+          dueDate: '2024-07-15', 
+          description: 'Learn basic HTML tags and structure', 
+          files: ['https://example.com/html-guide.pdf', 'https://example.com/tutorial.html']
+        },
+        { 
+          id: 'asg_2', 
+          title: 'CSS Styling', 
+          dueDate: '2024-07-22', 
+          description: 'Style web pages with CSS', 
+          files: ['https://example.com/css-cheatsheet.pdf']
+        }
+      ];
+      
+      commentsData = {
+        'asg_1': [
+          { author: 'Student', text: 'Great assignment! Learned a lot about HTML structure.' },
+          { author: 'Teacher', text: 'Remember to validate your HTML using the W3C validator.' }
+        ],
+        'asg_2': [
+          { author: 'Student', text: 'CSS is challenging but fun!' }
+        ]
+      };
+    }
+    
+    const assignment = assignments.find(a => a.id === currentAssignmentId);
+    currentComments = commentsData[currentAssignmentId] || [];
+    
+    if (assignment) {
+      renderAssignmentDetails(assignment);
+      renderComments();
+      
+      if (commentForm) {
+        commentForm.addEventListener('submit', handleAddComment);
+      }
+    } else {
+      assignmentTitle.textContent = 'Error: Assignment not found.';
+      assignmentDueDate.textContent = '';
+      assignmentDescription.textContent = '';
+    }
+  } catch (error) {
+    assignmentTitle.textContent = 'Error loading assignment data.';
+    console.error('Error initializing page:', error);
+  }
 }
 
 // --- Initial Page Load ---
