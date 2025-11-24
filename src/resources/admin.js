@@ -17,8 +17,9 @@ let resources = [];
 
 // --- Element Selections ---
 // TODO: Select the resource form ('#resource-form').
-
+const resourceForm = document.getElementById('resource-form');
 // TODO: Select the resources table body ('#resources-tbody').
+const resourceTable = document.getElementById('resource-tbody')
 
 // --- Functions ---
 
@@ -34,6 +35,32 @@ let resources = [];
  */
 function createResourceRow(resource) {
   // ... your implementation here ...
+  const row = document.createElement('tr');
+
+  const titleC = document.createElement('td');
+  titleC.textContent = resource.title;
+  row.appendChild(titleC);
+
+  const desC = document.createElement('td');
+  desC.textContent = resource.description;
+  row.appendChild(desC);
+
+  const actionC = document.createElement('td');
+  const editButton = document.createElement('button');
+  editButton.textContent = 'Edit';
+  editButton.className = 'edit-btn';
+  editButton.setAttribute('data-id', resource.id);
+
+  const deletebtn = document.createElement('button');
+  deletebtn.textContent = 'Delete';
+  deletebtn.className = 'delete-btn';
+  deletebtn.setAttribute('data-id', resource.id);
+
+  actionC.appendChild(editButton);
+  actionC.appendChild(deletebtn);
+  row.appendChild(actionC);
+
+  return row;
 }
 
 /**
@@ -46,6 +73,11 @@ function createResourceRow(resource) {
  */
 function renderTable() {
   // ... your implementation here ...
+  resourceTable.innerHTML = '';
+  resources.forEach(resource => {
+    const rows = createResourceRow(resource);
+    renderTable.appendChild(rows);
+  });
 }
 
 /**
@@ -61,7 +93,26 @@ function renderTable() {
  */
 function handleAddResource(event) {
   // ... your implementation here ...
+
+  event.preventDefault();
+
+  const title = document.getElementById('resource-title').value;
+  const description = document.getElementById('resource-description').value;
+  const link = document.getElementById('resource-link').value;
+
+  const newResource = {
+    id: `res_${Date.now()}`,
+    title,
+    description,
+    link
+  };
+
+  resources.push(newResource);
+  renderTable();
+  resourceForm.reset();
 }
+
+
 
 /**
  * TODO: Implement the handleTableClick function.
@@ -75,6 +126,12 @@ function handleAddResource(event) {
  */
 function handleTableClick(event) {
   // ... your implementation here ...
+  const target =event.target(); 
+  if (target.classList.contains('delete-btn')){
+    const resId = target.getAttribute('data-id');
+    resources = resources.filter(re => re.id !== resId);
+    renderTable();
+  } 
 }
 
 /**
@@ -89,6 +146,17 @@ function handleTableClick(event) {
  */
 async function loadAndInitialize() {
   // ... your implementation here ...
+  try{
+    const res = await fetch('resources.json'); 
+  resources = await res.json();
+  renderTable();
+  resourceForm.addEventListener('submit',handleAddResource);
+  resourceTable.addEventListener('click', handleTableClick);
+  }
+  catch(error){
+    console.error('Error', error);
+  }
+  
 }
 
 // --- Initial Page Load ---

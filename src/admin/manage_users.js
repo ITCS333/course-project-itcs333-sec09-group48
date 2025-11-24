@@ -10,7 +10,7 @@
 */
 
 // --- Global Data Store ---
-// This array will be populated with data fetched from 'students.json'.
+// This array will be populuted with data fetched from 'students.json'.
 let students = [];
 
 // --- Element Selections ---
