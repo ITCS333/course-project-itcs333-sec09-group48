@@ -17,17 +17,10 @@ let assignments = [];
 
 // --- Element Selections ---
 // TODO: Select the assignment form ('#assignment-form').
-<<<<<<< HEAD
 const assignmentForm = document.getElementById('assignment-form')
 
 // TODO: Select the assignments table body ('#assignments-tbody').
 const assignmentsTableBody = document.getElementById('assignments-tbody')
-=======
-const assignmentForm = document.getElementById('assignment-form');
-
-// TODO: Select the assignments table body ('#assignments-tbody').
-const assignmentsTableBody = document.getElementById('assignments-tbody');
->>>>>>> 33f587dd63538afa0671281286f66a058413baf4
 
 // --- Functions ---
 
@@ -42,7 +35,6 @@ const assignmentsTableBody = document.getElementById('assignments-tbody');
  * - A "Delete" button with class "delete-btn" and `data-id="${id}"`.
  */
 function createAssignmentRow(assignment) {
-<<<<<<< HEAD
   // ... your implementation here ...
   const row = document.createElement('tr');
   const titleC = document.createElement('td');
@@ -69,45 +61,6 @@ function createAssignmentRow(assignment) {
 
   return row;
 
-=======
-  //alerts
-  alert(`createAssignmentRow called for: ${assignment.title}`);
-
-
-  const { id, title, dueDate } = assignment;
-
-  const tr = document.createElement('tr');
-
-  // Title cell
-  const titleTd = document.createElement('td');
-  titleTd.textContent = title;
-  tr.appendChild(titleTd);
-
-  // Due date cell
-  const dueTd = document.createElement('td');
-  dueTd.textContent = dueDate;
-  tr.appendChild(dueTd);
-
-  // Actions cell with buttons
-  const actionsTd = document.createElement('td');
-
-  const editBtn = document.createElement('button');
-  editBtn.type = 'button';
-  editBtn.className = 'edit-assignment'; // Match HTML class
-  editBtn.dataset.id = id;
-  editBtn.textContent = 'Edit';
-
-  const deleteBtn = document.createElement('button');
-  deleteBtn.type = 'button';
-  deleteBtn.className = 'delete-assignment'; // Match HTML class
-  deleteBtn.dataset.id = id;
-  deleteBtn.textContent = 'Delete';
-
-  actionsTd.append(editBtn, deleteBtn);
-  tr.appendChild(actionsTd);
-
-  return tr;
->>>>>>> 33f587dd63538afa0671281286f66a058413baf4
 }
 
 /**
@@ -119,17 +72,9 @@ function createAssignmentRow(assignment) {
  * append the resulting <tr> to `assignmentsTableBody`.
  */
 function renderTable() {
-<<<<<<< HEAD
   // ... your implementation here ...
   assignmentsTableBody.innerHTML = ' ';
   assignments.forEach(assignments => {
-=======
-  //alerts
-   alert(`renderTable called. Number of assignments: ${assignments.length}`);
-
-  assignmentsTableBody.innerHTML = '';
-  assignments.forEach(assignment => {
->>>>>>> 33f587dd63538afa0671281286f66a058413baf4
     const row = createAssignmentRow(assignment);
     assignmentsTableBody.appendChild(row);
   });
@@ -147,7 +92,6 @@ function renderTable() {
  * 6. Reset the form.
  */
 function handleAddAssignment(event) {
-<<<<<<< HEAD
   // ... your implementation here ...
   event.preventDefault();
   const title = document.getElementById('assignment-title').value;
@@ -161,52 +105,13 @@ function handleAddAssignment(event) {
   }
 
   const newAssig = {
-=======
-  event.preventDefault();
-  //alerts
-  alert('handleAddAssignment called');
-  
-  // Get values directly from input elements (matching HTML IDs)
-  const titleInput = document.getElementById('assignment-title');
-  const descriptionInput = document.getElementById('assignment-description');
-  const dueDateInput = document.getElementById('assignment-due-date');
-  const filesInput = document.getElementById('assignment-files');
-
-  //alerts
-  alert(`Input values - Title: ${title}, Due: ${dueDate}, Description: ${description}`);
-
-  const title = titleInput.value.trim();
-  const description = descriptionInput.value.trim();
-  const dueDate = dueDateInput.value;
-  const filesText = filesInput.value.trim();
-
-  // Basic validation
-  if (!title) {
-    alert('Please enter a title');
-    return;
-  }
-  if (!dueDate) {
-    alert('Please select a due date');
-    return;
-  }
-
-  // Process files (split by newline)
-  const files = filesText ? filesText.split('\n').map(line => line.trim()).filter(line => line) : [];
-
-  const newAssignment = {
->>>>>>> 33f587dd63538afa0671281286f66a058413baf4
     id: `asg_${Date.now()}`,
     title,
     description,
     dueDate,
     files
   };
-<<<<<<< HEAD
   assignments.push(newAssig);
-=======
-
-  assignments.push(newAssignment);
->>>>>>> 33f587dd63538afa0671281286f66a058413baf4
   renderTable();
   assignmentForm.reset();
 }
@@ -222,7 +127,6 @@ function handleAddAssignment(event) {
  * 4. Call `renderTable()` to refresh the list.
  */
 function handleTableClick(event) {
-<<<<<<< HEAD
   // ... your implementation here ...
   const tar = event.target;
   if (tar.classList.contains('delet-btn')) {
@@ -232,46 +136,6 @@ function handleTableClick(event) {
     
   }
 
-=======
-  const btn = event.target;
-
-  //alerts
-  alert(`handleTableClick called on element: ${btn.tagName}, class: ${btn.className}`);
-  
-  // DELETE
-  if (btn.classList.contains('delete-assignment')) {
-    //alerts
-    alert(`Deleting assignment with id: ${btn.dataset.id}`);
-
-
-    let id = btn.dataset.id;
-
-    // If button has no data-id (HTML dummy row)
-    if (!id) {
-      const row = btn.closest('tr');
-      if (row) row.remove();
-      return;
-    }
-
-    assignments = assignments.filter(a => a.id !== id);
-    renderTable();
-  }
-  
-  // EDIT item (not implemented, just alert)
-  if (btn.classList.contains('edit-assignment')) {
-    //alerts
-    alert(`Edit clicked for assignment id: ${btn.dataset.id}`);
-
-    let id = btn.dataset.id;
-
-    if (!id) {
-      alert("This static HTML row cannot be edited.");
-      return;
-    }
-
-    alert(`Edit functionality for assignment ${id} would go here`);
-  }
->>>>>>> 33f587dd63538afa0671281286f66a058413baf4
 }
 
 
@@ -286,7 +150,6 @@ function handleTableClick(event) {
  * 5. Add the 'click' event listener to `assignmentsTableBody` (calls `handleTableClick`).
  */
 async function loadAndInitialize() {
-<<<<<<< HEAD
   // ... your implementation here ...
   const res= await fetch('assignments.json');
   assignments = await res.json();
@@ -295,43 +158,6 @@ async function loadAndInitialize() {
   assignmentForm.addEventListener('submit' , handleAddAssignment);
   assignmentsTableBody.addEventListener('click' , handleTableClick);
 
-=======
-  //alerts
-  alert('loadAndInitialize called');
-
-  try {
-    // For demo purposes, we'll use some sample data since assignments.json might not exist
-    assignments = [
-      { id: 'asg_1', title: 'HTML Basics', dueDate: '2024-07-15', description: 'Learn basic HTML tags', files: [] },
-      { id: 'asg_2', title: 'CSS Styling', dueDate: '2024-07-22', description: 'Style web pages with CSS', files: [] }
-    ];
-
-    //alerts
-    alert(`Sample assignments loaded: ${assignments.map(a => a.title).join(', ')}`);
-    
-    // If you have a real assignments.json file, uncomment this:
-    /*
-    const res = await fetch('assignments.json');
-    if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
-    const data = await res.json();
-    assignments = Array.isArray(data) ? data : [];
-    */
-    
-  } catch (err) {
-    console.error('Error loading assignments:', err);
-    // Fallback to empty array
-    assignments = [];
-  }
-
-  renderTable();
-
-  if (assignmentForm) {
-    assignmentForm.addEventListener('submit', handleAddAssignment);
-  }
-  if (assignmentsTableBody) {
-    assignmentsTableBody.addEventListener('click', handleTableClick);
-  }
->>>>>>> 33f587dd63538afa0671281286f66a058413baf4
 }
 
 // --- Initial Page Load ---
