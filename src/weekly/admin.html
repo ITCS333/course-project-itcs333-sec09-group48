@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="../common/styles.css">
 
     <!--javaScript file-->
-    <script src="../weekly/admin.js" defer></script>
+    <script src="admin.js" defer></script>
 
 </head>
 
@@ -123,7 +123,7 @@
                     </tr>
                 </thead>
                 <!-- TODO: Create a 'tbody' for the data. -->
-                <tbody>
+                <tbody id="weeks-tbody">
 
                     <!-- TODO: Add 1-2 rows of dummy data to see the structure. -->
                     <!-- Example Row 1: -->
@@ -137,11 +137,11 @@
                         <td>
 
                             <!-- TODO: Add an "Edit" button. -->
-                            <button>Edit</button>
+                            <button class="edit-btn" data-id="week_1">Edit</button>
 
                             <!-- TODO: Add a "Delete" button. -->
-                            <button>Delete</button>
-
+                            <button class="delete-btn" data-id="week_1">Delete</button>
+                            
                             <!-- End of actions 'td'. -->
                         </td>
 
