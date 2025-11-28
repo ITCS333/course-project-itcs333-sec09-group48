@@ -62,20 +62,20 @@ function createStudentRow(student) {
   emailCell.textContent = student.email;
 
   const actionCell = document.createElement('td');
-  
+
   const buttonsContainer = document.createElement('div');
   buttonsContainer.className = 'buttons-container';
 
   const editBtn = document.createElement('button');
   editBtn.type = 'button';
   editBtn.className = 'edit-btn';
-  editBtn.dataset.id = student.id; 
+  editBtn.dataset.id = student.id;
   editBtn.textContent = 'Edit';
 
   const deleteBtn = document.createElement('button');
   deleteBtn.type = 'button';
   deleteBtn.className = 'delete-btn';
-  deleteBtn.dataset.id = student.id; 
+  deleteBtn.dataset.id = student.id;
   deleteBtn.textContent = 'Delete';
 
   buttonsContainer.appendChild(editBtn);
@@ -181,8 +181,10 @@ function handleAddStudent(event) {
   const newStudent = { name, id, email };
   students.push(newStudent);
 
+  localStorage.setItem('students', JSON.stringify(students));
+  
   renderTable(students);
-
+  alert(`✅ Student "${name}" added successfully!`);
   addStudentForm.reset();
 }
 
@@ -220,8 +222,8 @@ function handleTableClick(event) {
         student.name = newName;
         student.email = newEmail;
         renderTable(students);
-      } 
-    } 
+      }
+    }
   }
 }
 
@@ -323,13 +325,19 @@ function handleSort(event) {
 async function loadStudentsAndInitialize() {
   // ... your implementation here ...
   try {
-    const response = await fetch('api/students.json');
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch students: ${response.status}`);
+    const savedStudents = localStorage.getItem('students');
+    if (savedStudents) {
+      students = JSON.parse(savedStudents);
+      console.log('Loaded students from memory');
     }
 
-    students = await response.json();
+    if (students.length === 0) {
+      const response = await fetch('./api/students.json');
+      if (response.ok) {
+        students = await response.json();
+        console.log('Loaded students from file');
+      }
+    }
 
     renderTable(students);
 
