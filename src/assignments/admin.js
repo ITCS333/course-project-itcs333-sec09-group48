@@ -144,12 +144,116 @@ function handleTableClick(event) {
         renderTable();
     }
     
-    // You can add edit functionality later
     if (target.classList.contains('edit-btn')) {
         const id = target.getAttribute('data-id');
-        console.log('Edit assignment with id:', id);
-        // Add edit functionality here
+        editAssignment(id);
     }
+}
+
+// New function to handle editing assignments
+function editAssignment(id) {
+    // Find the assignment to edit
+    const assignmentToEdit = assignments.find(a => a.id === id);
+    
+    if (!assignmentToEdit) {
+        console.error('Assignment not found for editing');
+        return;
+    }
+    
+    // Populate the form with the assignment data
+    document.getElementById('assignment-title').value = assignmentToEdit.title;
+    document.getElementById('assignment-description').value = assignmentToEdit.description;
+    document.getElementById('assignment-due-date').value = assignmentToEdit.dueDate;
+    
+    // Convert files array to newline-separated string
+    const filesText = Array.isArray(assignmentToEdit.files) 
+        ? assignmentToEdit.files.join('\n')
+        : assignmentToEdit.files || '';
+    document.getElementById('assignment-files').value = filesText;
+    
+    // Change button text and functionality
+    const submitButton = document.getElementById('add-assignment');
+    submitButton.textContent = 'Update Assignment';
+    submitButton.classList.add('updating');
+    
+    // Remove any existing edit mode event listeners
+    const form = document.getElementById('assignment-form');
+    const newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
+    
+    // Add new submit handler for edit mode
+    newForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        updateAssignment(id);
+    });
+    
+    // Add cancel button if not already present
+    if (!document.getElementById('cancel-edit')) {
+        const cancelButton = document.createElement('button');
+        cancelButton.id = 'cancel-edit';
+        cancelButton.type = 'button';
+        cancelButton.textContent = 'Cancel Edit';
+        cancelButton.addEventListener('click', resetForm);
+        
+        newForm.querySelector('fieldset').appendChild(cancelButton);
+    }
+}
+
+// Function to update the assignment
+function updateAssignment(id) {
+    // Get updated values from form
+    const title = document.getElementById('assignment-title').value;
+    const description = document.getElementById('assignment-description').value;
+    const dueDate = document.getElementById('assignment-due-date').value;
+    const filesInput = document.getElementById('assignment-files').value;
+    
+    if (!title || !dueDate) {
+        alert('Please fill out all required fields (Title and Due Date)');
+        return;
+    }
+    
+    // Convert files text to array
+    const files = filesInput 
+        ? filesInput.split('\n').map(line => line.trim()).filter(line => line !== '')
+        : [];
+    
+    // Find and update the assignment
+    const index = assignments.findIndex(a => a.id === id);
+    if (index !== -1) {
+        assignments[index] = {
+            ...assignments[index], // Keep existing properties
+            title,
+            description,
+            dueDate,
+            files
+        };
+        
+        renderTable();
+        resetForm();
+        alert('Assignment updated successfully!');
+    }
+}
+
+// Function to reset the form after editing
+function resetForm() {
+    const form = document.getElementById('assignment-form');
+    form.reset();
+    
+    // Reset button text and classes
+    const submitButton = document.getElementById('add-assignment');
+    submitButton.textContent = 'Add Assignment';
+    submitButton.classList.remove('updating');
+    
+    // Remove cancel button if exists
+    const cancelButton = document.getElementById('cancel-edit');
+    if (cancelButton) {
+        cancelButton.remove();
+    }
+    
+    // Reset form event listener to handleAddAssignment
+    const newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
+    newForm.addEventListener('submit', handleAddAssignment);
 }
 
 /**
