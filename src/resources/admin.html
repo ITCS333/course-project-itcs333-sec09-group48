@@ -21,6 +21,10 @@
     <link rel="stylesheet" href="../common/styles.css">
 
     <button id="darkModeToggle" class="dark-mode-btn">🌙 Dark Mode</button>
+
+    <!--javaScript file-->
+    <script src="./admin.js" defer></script>
+
 </head>
 
 <body>
@@ -88,7 +92,7 @@
                     </tr>
                 </thead>
                 <!-- TODO: Create a 'tbody' for the data. -->
-                <tbody>
+                <tbody id="resources-tbody">
                     <!-- TODO: Add 2-3 rows of dummy data to see the structure. -->
                     <!-- Example Row 1: -->
                     <!-- TODO: Create a 'tr' for the first resource. -->
@@ -102,8 +106,8 @@
                         <td>Chapter 1 Notes</td>
                         <td> Introduction to HTML</td> <!--description -->
                         <td>
-                            <button>Edit</button>
-                            <button>Delete</button>
+                            <button class="edit-btn">Edit</button>
+                            <button class="delete-btn">Delete</button>
                         </td>
                     </tr>
                     <!-- Example Row 2: -->
@@ -115,8 +119,8 @@
                         <td>Chapter 2 Notes </td>
                         <td> Basic CSS Styling </td>
                         <td>
-                            <button>Edit</button>
-                            <button>Delete</button>
+                            <button class="edit-btn">Edit</button>
+                            <button class="delete-btn">Delete</button>
                         </td>
                     </tr>
                     <!-- End of tbody. -->
@@ -130,5 +134,4 @@
     <script src="../common/dark-mode.js"></script>
 
 </body>
-<script src="admin.js"></script>
 </html>
