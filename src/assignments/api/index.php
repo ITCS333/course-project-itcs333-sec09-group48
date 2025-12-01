@@ -43,10 +43,16 @@
 header('Content-Type: application/json; charset=utf-8');
 
 // TODO: Set CORS headers to allow cross-origin requests
-
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 
 // TODO: Handle preflight OPTIONS request
-
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    // Return 200 OK for preflight requests
+    http_response_code(200);
+    exit();
+}
 
 
 // ============================================================================
@@ -54,10 +60,24 @@ header('Content-Type: application/json; charset=utf-8');
 // ============================================================================
 
 // TODO: Include the database connection class
-
+require_once __DIR__. 'Database.php';
 
 // TODO: Create database connection
-
+try {
+    $database = new Database();
+    $conn = $database->getConnection();
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Database connection failed',
+        'error' => $e->getMessage()
+    ]);
+    exit();
+}
 
 // TODO: Set PDO to throw exceptions on errors
 
@@ -68,12 +88,39 @@ header('Content-Type: application/json; charset=utf-8');
 // ============================================================================
 
 // TODO: Get the HTTP request method
-
+$method = $_SERVER['REQUEST_METHOD'];
 
 // TODO: Get the request body for POST and PUT requests
-
+$input = [];
+if ($method === 'POST' || $method === 'PUT') {
+    $rowInput = file_get_contents('php://input');
+    $input = json_decode($rowInput, true);
+    if (!empty($rowInput)){
+        $decoded = json_decode($rowInput, true);
+    } else {
+        parse_str($rowInput, $decoded);
+    }
+    if ($method === 'POST' && empty($input) && !empty($_POST)) {
+        $input = $_POST;
+    }
+}
 
 // TODO: Parse query parameters
+$queryParams = [];
+if (!empty($_SERVER['QUERY_STRING'])) {
+    parse_str($_SERVER['QUERY_STRING'], $queryParams);
+}
+
+// Also get any URL parameters if you're using URL rewriting
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$pathSegments = explode('/', trim($path, '/'));
+
+// Initialize response array
+$response = [
+    'success' => false,
+    'message' => '',
+    'data' => null
+];
 
 
 
