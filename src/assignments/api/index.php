@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // ============================================================================
 
 // TODO: Include the database connection class
-require_once __DIR__. 'Database.php';
+require_once 'Database.php';
 
 // TODO: Create database connection
 try {
