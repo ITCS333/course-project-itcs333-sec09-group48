@@ -129,13 +129,11 @@ function handleAddAssignment(event) {
 function handleTableClick(event) {
   // ... your implementation here ...
   const tar = event.target;
-  if (tar.classList.contains('delet-btn')) {
+  if (tar.classList.contains('delete-btn')) {
     const id = tar.getAttribute('data-id');
       assignments = assignments.filter(a => a.id !== id);
       renderTable();
-    
   }
-
 }
 
 
@@ -151,7 +149,7 @@ function handleTableClick(event) {
  */
 async function loadAndInitialize() {
   // ... your implementation here ...
-  const res= await fetch('assignments.json');
+  const res= await fetch('./api/assignments.json');
   assignments = await res.json();
   renderTable();
 
