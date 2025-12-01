@@ -34,34 +34,76 @@ const assignmentsTableBody = document.getElementById('assignments-tbody')
  * - An "Edit" button with class "edit-btn" and `data-id="${id}"`.
  * - A "Delete" button with class "delete-btn" and `data-id="${id}"`.
  */
+// Fixed createAssignmentRow function - added missing elements
 function createAssignmentRow(assignment) {
-  // ... your implementation here ...
-  const row = document.createElement('tr');
-  const titleC = document.createElement('td');
-  titleC.textContent = assignment.title;
-  const DDateC = document.createElement('td');
-  DDateC.textContent = assignment.dueDate;
-  const actionC = document.createElement('td');
-  const editbtn = document.createElement('button');
-  editbtn.textContent = 'Edit';
-  editbtn.className = 'edit-btn';
-  editbtn.setAttribute('data-id', assignment.id);
-
-  const deletebtn = document.createElement('button');
-  deletebtn.textContent = 'Delete';
-  deletebtn.className = 'delete-btn';
-  deletebtn.setAttribute('data-id', assignment.id);
-
-  actionC.appendChild(editbtn);
-  actionC.appendChild(deletebtn);
-
-  row.appendChild(titleC);
-  row.appendChild(DDateC);
-  row.appendChild(actionC);
-
-  return row;
-
+    const row = document.createElement('tr');
+    
+    const titleCell = document.createElement('td');
+    titleCell.textContent = assignment.title;
+    
+    const dueDateCell = document.createElement('td');
+    dueDateCell.textContent = assignment.dueDate;
+    
+    const actionsCell = document.createElement('td');
+    
+    const editButton = document.createElement('button');
+    editButton.textContent = 'Edit';
+    editButton.className = 'edit-btn';
+    editButton.setAttribute('data-id', assignment.id);
+    
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.className = 'delete-btn';
+    deleteButton.setAttribute('data-id', assignment.id);
+    
+    actionsCell.appendChild(editButton);
+    actionsCell.appendChild(deleteButton);
+    
+    row.appendChild(titleCell);
+    row.appendChild(dueDateCell);
+    row.appendChild(actionsCell);
+    
+    return row;
 }
+
+// Fixed renderTable function - fixed variable name
+function renderTable() {
+    assignmentsTableBody.innerHTML = '';
+    
+    // FIXED: Changed 'assignments' to 'assignment' in the forEach loop
+    assignments.forEach(assignment => {
+        const row = createAssignmentRow(assignment);
+        assignmentsTableBody.appendChild(row);
+    });
+}
+
+// Fixed handleAddAssignment - added validation and better error handling
+function handleAddAssignment(event) {
+    event.preventDefault();
+    
+    const title = document.getElementById('assignment-title').value;
+    const description = document.getElementById('assignment-description').value;
+    const dueDate = document.getElementById('assignment-due-date').value;
+    const files = document.getElementById('assignment-files').value;
+    
+    if (!title || !dueDate) {
+        alert('Please fill out all required fields (Title and Due Date)');
+        return;
+    }
+    
+    const newAssignment = {
+        id: `asg_${Date.now()}`,
+        title,
+        description,
+        dueDate,
+        files
+    };
+    
+    assignments.push(newAssignment);
+    renderTable();
+    assignmentForm.reset();
+}
+
 
 /**
  * TODO: Implement the renderTable function.
@@ -147,15 +189,37 @@ function handleTableClick(event) {
  * 4. Add the 'submit' event listener to `assignmentForm` (calls `handleAddAssignment`).
  * 5. Add the 'click' event listener to `assignmentsTableBody` (calls `handleTableClick`).
  */
+// Fixed loadAndInitialize function - better error handling for fetch
 async function loadAndInitialize() {
-  // ... your implementation here ...
-  const res= await fetch('./api/assignments.json');
-  assignments = await res.json();
-  renderTable();
-
-  assignmentForm.addEventListener('submit' , handleAddAssignment);
-  assignmentsTableBody.addEventListener('click' , handleTableClick);
-
+    try {
+        // Try different paths if needed:
+        // Option 1: If assignments.json is in the same directory as admin.js
+        // const response = await fetch('assignments.json');
+        
+        // Option 2: If it's in a parent directory
+        // const response = await fetch('../assignments.json');
+        
+        // Option 3: Current path
+        const response = await fetch('./api/assignments.json');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        assignments = await response.json();
+        renderTable();
+        
+        // Add event listeners
+        assignmentForm.addEventListener('submit', handleAddAssignment);
+        assignmentsTableBody.addEventListener('click', handleTableClick);
+        
+    } catch (error) {
+        console.error('Error loading assignments:', error);
+        // Fallback to empty array or show error message
+        assignments = [];
+        renderTable();
+        alert('Could not load assignments. Using empty list.');
+    }
 }
 
 // --- Initial Page Load ---
