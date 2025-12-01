@@ -17,10 +17,10 @@ let assignments = [];
 
 // --- Element Selections ---
 // TODO: Select the assignment form ('#assignment-form').
-const assignmentForm = document.getElementById('assignment-form')
+const assignmentForm = document.getElementById('assignment-form');
 
 // TODO: Select the assignments table body ('#assignments-tbody').
-const assignmentsTableBody = document.getElementById('assignments-tbody')
+const assignmentsTableBody = document.getElementById('assignments-tbody');
 
 // --- Functions ---
 
@@ -34,7 +34,6 @@ const assignmentsTableBody = document.getElementById('assignments-tbody')
  * - An "Edit" button with class "edit-btn" and `data-id="${id}"`.
  * - A "Delete" button with class "delete-btn" and `data-id="${id}"`.
  */
-// Fixed createAssignmentRow function - added missing elements
 function createAssignmentRow(assignment) {
     const row = document.createElement('tr');
     
@@ -42,6 +41,7 @@ function createAssignmentRow(assignment) {
     titleCell.textContent = assignment.title;
     
     const dueDateCell = document.createElement('td');
+    // Format date if needed, or just display as-is
     dueDateCell.textContent = assignment.dueDate;
     
     const actionsCell = document.createElement('td');
@@ -66,45 +66,6 @@ function createAssignmentRow(assignment) {
     return row;
 }
 
-// Fixed renderTable function - fixed variable name
-function renderTable() {
-    assignmentsTableBody.innerHTML = '';
-    
-    // FIXED: Changed 'assignments' to 'assignment' in the forEach loop
-    assignments.forEach(assignment => {
-        const row = createAssignmentRow(assignment);
-        assignmentsTableBody.appendChild(row);
-    });
-}
-
-// Fixed handleAddAssignment - added validation and better error handling
-function handleAddAssignment(event) {
-    event.preventDefault();
-    
-    const title = document.getElementById('assignment-title').value;
-    const description = document.getElementById('assignment-description').value;
-    const dueDate = document.getElementById('assignment-due-date').value;
-    const files = document.getElementById('assignment-files').value;
-    
-    if (!title || !dueDate) {
-        alert('Please fill out all required fields (Title and Due Date)');
-        return;
-    }
-    
-    const newAssignment = {
-        id: `asg_${Date.now()}`,
-        title,
-        description,
-        dueDate,
-        files
-    };
-    
-    assignments.push(newAssignment);
-    renderTable();
-    assignmentForm.reset();
-}
-
-
 /**
  * TODO: Implement the renderTable function.
  * It should:
@@ -114,12 +75,12 @@ function handleAddAssignment(event) {
  * append the resulting <tr> to `assignmentsTableBody`.
  */
 function renderTable() {
-  // ... your implementation here ...
-  assignmentsTableBody.innerHTML = ' ';
-  assignments.forEach(assignments => {
-    const row = createAssignmentRow(assignment);
-    assignmentsTableBody.appendChild(row);
-  });
+    assignmentsTableBody.innerHTML = '';
+    
+    assignments.forEach(assignment => {
+        const row = createAssignmentRow(assignment);
+        assignmentsTableBody.appendChild(row);
+    });
 }
 
 /**
@@ -134,28 +95,34 @@ function renderTable() {
  * 6. Reset the form.
  */
 function handleAddAssignment(event) {
-  // ... your implementation here ...
-  event.preventDefault();
-  const title = document.getElementById('assignment-title').value;
-  const description = document.getElementById('assignment-description').value;
-  const dueDate = document.getElementById('assignment-due-date').value;
-  const files = document.getElementById('assignment-files').value;
-
-  if (!title || !dueDate) {
-    alert('Please fill out the required fields');
-    return;
-  }
-
-  const newAssig = {
-    id: `asg_${Date.now()}`,
-    title,
-    description,
-    dueDate,
-    files
-  };
-  assignments.push(newAssig);
-  renderTable();
-  assignmentForm.reset();
+    event.preventDefault();
+    
+    const title = document.getElementById('assignment-title').value;
+    const description = document.getElementById('assignment-description').value;
+    const dueDate = document.getElementById('assignment-due-date').value;
+    const filesInput = document.getElementById('assignment-files').value;
+    
+    if (!title || !dueDate) {
+        alert('Please fill out all required fields (Title and Due Date)');
+        return;
+    }
+    
+    // Convert files text (one per line) to array
+    const files = filesInput 
+        ? filesInput.split('\n').map(line => line.trim()).filter(line => line !== '')
+        : [];
+    
+    const newAssignment = {
+        id: `asg_${Date.now()}`,
+        title,
+        description,
+        dueDate,
+        files
+    };
+    
+    assignments.push(newAssignment);
+    renderTable();
+    assignmentForm.reset();
 }
 
 /**
@@ -169,15 +136,21 @@ function handleAddAssignment(event) {
  * 4. Call `renderTable()` to refresh the list.
  */
 function handleTableClick(event) {
-  // ... your implementation here ...
-  const tar = event.target;
-  if (tar.classList.contains('delete-btn')) {
-    const id = tar.getAttribute('data-id');
-      assignments = assignments.filter(a => a.id !== id);
-      renderTable();
-  }
+    const target = event.target;
+    
+    if (target.classList.contains('delete-btn')) {
+        const id = target.getAttribute('data-id');
+        assignments = assignments.filter(a => a.id !== id);
+        renderTable();
+    }
+    
+    // You can add edit functionality later
+    if (target.classList.contains('edit-btn')) {
+        const id = target.getAttribute('data-id');
+        console.log('Edit assignment with id:', id);
+        // Add edit functionality here
+    }
 }
-
 
 /**
  * TODO: Implement the loadAndInitialize function.
@@ -189,36 +162,70 @@ function handleTableClick(event) {
  * 4. Add the 'submit' event listener to `assignmentForm` (calls `handleAddAssignment`).
  * 5. Add the 'click' event listener to `assignmentsTableBody` (calls `handleTableClick`).
  */
-// Fixed loadAndInitialize function - better error handling for fetch
 async function loadAndInitialize() {
     try {
-        // Try different paths if needed:
-        // Option 1: If assignments.json is in the same directory as admin.js
-        // const response = await fetch('assignments.json');
+        console.log('Loading assignments from: assignments.json');
         
-        // Option 2: If it's in a parent directory
-        // const response = await fetch('../assignments.json');
-        
-        // Option 3: Current path
-        const response = await fetch('./api/assignments.json');
+        // Try different paths based on your file structure
+        // If your structure is: assignments/api/assignments.json
+        const response = await fetch('api/assignments.json');
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         assignments = await response.json();
+        console.log('Successfully loaded assignments:', assignments);
+        
+        // Verify assignments is an array
+        if (!Array.isArray(assignments)) {
+            console.warn('assignments.json does not contain an array');
+            assignments = [];
+        }
+        
         renderTable();
         
         // Add event listeners
         assignmentForm.addEventListener('submit', handleAddAssignment);
         assignmentsTableBody.addEventListener('click', handleTableClick);
         
+        console.log('Application initialized successfully');
+        
     } catch (error) {
         console.error('Error loading assignments:', error);
-        // Fallback to empty array or show error message
-        assignments = [];
+        
+        // Use fallback data matching your JSON structure
+        assignments = [
+            {
+                "id": "asg_1",
+                "title": "Assignment 1: HTML Basics",
+                "description": "Create a semantic HTML structure for a personal portfolio. Focus on using tags like <header>, <nav>, <main>, <article>, and <footer>.",
+                "dueDate": "2025-11-10",
+                "files": ["portfolio-requirements.pdf", "examples.zip"]
+            },
+            {
+                "id": "asg_2",
+                "title": "Assignment 2: CSS Styling",
+                "description": "Style your HTML portfolio using modern CSS. You must use Flexbox or Grid for layout and include at least one CSS animation.",
+                "dueDate": "2025-11-17",
+                "files": ["style-guide.pdf"]
+            },
+            {
+                "id": "asg_3",
+                "title": "Assignment 3: JavaScript Events",
+                "description": "Make your portfolio interactive. Add event listeners to create a modal window for your projects and a theme switcher (light/dark mode).",
+                "dueDate": "2025-11-24",
+                "files": ["js-requirements.pdf", "event-listeners-guide.txt"]
+            }
+        ];
+        
         renderTable();
-        alert('Could not load assignments. Using empty list.');
+        
+        // Still add event listeners
+        assignmentForm.addEventListener('submit', handleAddAssignment);
+        assignmentsTableBody.addEventListener('click', handleTableClick);
+        
+        alert('Could not load assignments from file. Using default assignments.');
     }
 }
 
