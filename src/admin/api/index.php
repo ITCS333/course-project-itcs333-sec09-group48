@@ -78,7 +78,7 @@ function getStudents($db) {
     $sort = isset($queryParams['sort']) ? $queryParams['sort'] : null;
     $order = isset($queryParams['order']) ? $queryParams['order'] : 'asc';
     
-    $sql = "SELECT id, student_id, name, email, created_at FROM students";
+    $sql = "SELECT id, student_id, name, email, created_at FROM users";
     
     if ($search) {
         $sql .= " WHERE name LIKE :search OR student_id LIKE :search OR email LIKE :search";
@@ -139,7 +139,7 @@ function getStudents($db) {
  */
 function getStudentById($db, $studentId) {
     // TODO: Prepare SQL query to select student by student_id
-    $sql = "SELECT id, student_id, name, email, created_at FROM students WHERE student_id = :student_id";
+    $sql = "SELECT id, student_id, name, email, created_at FROM users WHERE student_id = :student_id";
     
     try {
     
@@ -242,7 +242,7 @@ function createStudent($db, $data) {
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     
     // TODO: Prepare INSERT query
-    $sql = "INSERT INTO students (student_id, name, email, password) VALUES (:student_id, :name, :email, :password)";
+    $sql = "INSERT INTO users (student_id, name, email, password) VALUES (:student_id, :name, :email, :password)";
     
     // TODO: Bind parameters
     // Bind student_id, name, email, and hashed password
@@ -374,7 +374,7 @@ function updateStudent($db, $data) {
             return;
         }
         
-        $sql = "UPDATE students SET " . implode(', ', $updateFields) . " WHERE student_id = :student_id";
+        $sql = "UPDATE users SET " . implode(', ', $updateFields) . " WHERE student_id = :student_id";
     
     // TODO: Bind parameters dynamically
     // Bind only the parameters that are being updated
@@ -447,7 +447,7 @@ function deleteStudent($db, $studentId) {
         }
     
     // TODO: Prepare DELETE query
-    $sql = "DELETE FROM students WHERE student_id = :student_id";
+    $sql = "DELETE FROM users WHERE student_id = :student_id";
     
     // TODO: Bind the student_id parameter
     $stmt = $db->prepare($sql);
@@ -523,7 +523,7 @@ function changePassword($db, $data) {
     
     // TODO: Retrieve current password hash from database
     // Prepare and execute SELECT query to get password
-    $sql = "SELECT password FROM students WHERE student_id = :student_id";
+    $sql = "SELECT password FROM users WHERE student_id = :student_id";
         $stmt = $db->prepare($sql);
         $stmt->bindParam(':student_id', $student_id);
         $stmt->execute();
