@@ -41,7 +41,6 @@ function createAssignmentRow(assignment) {
     titleCell.textContent = assignment.title;
     
     const dueDateCell = document.createElement('td');
-    // Format date if needed, or just display as-is
     dueDateCell.textContent = assignment.dueDate;
     
     const actionsCell = document.createElement('td');
@@ -150,9 +149,8 @@ function handleTableClick(event) {
     }
 }
 
-// New function to handle editing assignments
+// Edit functionality (optional - keep if you need it)
 function editAssignment(id) {
-    // Find the assignment to edit
     const assignmentToEdit = assignments.find(a => a.id === id);
     
     if (!assignmentToEdit) {
@@ -160,34 +158,28 @@ function editAssignment(id) {
         return;
     }
     
-    // Populate the form with the assignment data
     document.getElementById('assignment-title').value = assignmentToEdit.title;
     document.getElementById('assignment-description').value = assignmentToEdit.description;
     document.getElementById('assignment-due-date').value = assignmentToEdit.dueDate;
     
-    // Convert files array to newline-separated string
     const filesText = Array.isArray(assignmentToEdit.files) 
         ? assignmentToEdit.files.join('\n')
         : assignmentToEdit.files || '';
     document.getElementById('assignment-files').value = filesText;
     
-    // Change button text and functionality
     const submitButton = document.getElementById('add-assignment');
     submitButton.textContent = 'Update Assignment';
     submitButton.classList.add('updating');
     
-    // Remove any existing edit mode event listeners
     const form = document.getElementById('assignment-form');
     const newForm = form.cloneNode(true);
     form.parentNode.replaceChild(newForm, form);
     
-    // Add new submit handler for edit mode
     newForm.addEventListener('submit', function(event) {
         event.preventDefault();
         updateAssignment(id);
     });
     
-    // Add cancel button if not already present
     if (!document.getElementById('cancel-edit')) {
         const cancelButton = document.createElement('button');
         cancelButton.id = 'cancel-edit';
@@ -199,9 +191,7 @@ function editAssignment(id) {
     }
 }
 
-// Function to update the assignment
 function updateAssignment(id) {
-    // Get updated values from form
     const title = document.getElementById('assignment-title').value;
     const description = document.getElementById('assignment-description').value;
     const dueDate = document.getElementById('assignment-due-date').value;
@@ -212,16 +202,14 @@ function updateAssignment(id) {
         return;
     }
     
-    // Convert files text to array
     const files = filesInput 
         ? filesInput.split('\n').map(line => line.trim()).filter(line => line !== '')
         : [];
     
-    // Find and update the assignment
     const index = assignments.findIndex(a => a.id === id);
     if (index !== -1) {
         assignments[index] = {
-            ...assignments[index], // Keep existing properties
+            ...assignments[index],
             title,
             description,
             dueDate,
@@ -234,23 +222,19 @@ function updateAssignment(id) {
     }
 }
 
-// Function to reset the form after editing
 function resetForm() {
     const form = document.getElementById('assignment-form');
     form.reset();
     
-    // Reset button text and classes
     const submitButton = document.getElementById('add-assignment');
     submitButton.textContent = 'Add Assignment';
     submitButton.classList.remove('updating');
     
-    // Remove cancel button if exists
     const cancelButton = document.getElementById('cancel-edit');
     if (cancelButton) {
         cancelButton.remove();
     }
     
-    // Reset form event listener to handleAddAssignment
     const newForm = form.cloneNode(true);
     form.parentNode.replaceChild(newForm, form);
     newForm.addEventListener('submit', handleAddAssignment);
@@ -268,10 +252,6 @@ function resetForm() {
  */
 async function loadAndInitialize() {
     try {
-        console.log('Loading assignments from: assignments.json');
-        
-        // Try different paths based on your file structure
-        // If your structure is: assignments/api/assignments.json
         const response = await fetch('api/assignments.json');
         
         if (!response.ok) {
@@ -279,7 +259,6 @@ async function loadAndInitialize() {
         }
         
         assignments = await response.json();
-        console.log('Successfully loaded assignments:', assignments);
         
         // Verify assignments is an array
         if (!Array.isArray(assignments)) {
@@ -293,33 +272,24 @@ async function loadAndInitialize() {
         assignmentForm.addEventListener('submit', handleAddAssignment);
         assignmentsTableBody.addEventListener('click', handleTableClick);
         
-        console.log('Application initialized successfully');
-        
     } catch (error) {
         console.error('Error loading assignments:', error);
-                            
-        // Use fallback data matching your JSON structure
+        
+        // Fallback data
         assignments = [
             {
-                "id": "asg_1",
-                "title": "Assignment 1: HTML Basics",
-                "description": "Create a semantic HTML structure for a personal portfolio. Focus on using tags like <header>, <nav>, <main>, <article>, and <footer>.",
-                "dueDate": "2025-11-10",
-                "files": ["portfolio-requirements.pdf", "examples.zip"]
+                id: "asg_1",
+                title: "Assignment 1: HTML Basics",
+                description: "Create a semantic HTML structure for a personal portfolio. Focus on using tags like <header>, <nav>, <main>, <article>, and <footer>.",
+                dueDate: "2025-11-10",
+                files: ["portfolio-requirements.pdf", "examples.zip"]
             },
             {
-                "id": "asg_2",
-                "title": "Assignment 2: CSS Styling",
-                "description": "Style your HTML portfolio using modern CSS. You must use Flexbox or Grid for layout and include at least one CSS animation.",
-                "dueDate": "2025-11-17",
-                "files": ["style-guide.pdf"]
-            },
-            {
-                "id": "asg_3",
-                "title": "Assignment 3: JavaScript Events",
-                "description": "Make your portfolio interactive. Add event listeners to create a modal window for your projects and a theme switcher (light/dark mode).",
-                "dueDate": "2025-11-24",
-                "files": ["js-requirements.pdf", "event-listeners-guide.txt"]
+                id: "asg_2",
+                title: "Assignment 2: CSS Styling",
+                description: "Style your HTML portfolio using modern CSS. You must use Flexbox or Grid for layout and include at least one CSS animation.",
+                dueDate: "2025-11-17",
+                files: ["style-guide.pdf"]
             }
         ];
         
@@ -334,5 +304,4 @@ async function loadAndInitialize() {
 }
 
 // --- Initial Page Load ---
-// Call the main async function to start the application.
 loadAndInitialize();
