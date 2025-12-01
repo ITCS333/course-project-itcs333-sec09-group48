@@ -193,7 +193,7 @@ async function loadAndInitialize() {
         
     } catch (error) {
         console.error('Error loading assignments:', error);
-        
+                            
         // Use fallback data matching your JSON structure
         assignments = [
             {
