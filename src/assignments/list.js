@@ -25,41 +25,25 @@ const listSection = document.getElementById('assignment-list-section');
  * This is how the detail page will know which assignment to load.
  */
 function createAssignmentArticle(assignment) {
-  const { id, title, dueDate, description } = assignment;
-
-  // Create the main article element
   const article = document.createElement('article');
-  article.className = 'assignment-item'; // Add a class for styling
-
-  // Create and append the title (h2)
-  const h2 = document.createElement('h2');
-  h2.textContent = title;
-  article.appendChild(h2);
-
-  // Create and append the due date (p)
-  const dueP = document.createElement('p');
-  dueP.className = 'due-date';
-  dueP.textContent = `Due: ${dueDate}`;
-  article.appendChild(dueP);
-
-  // Create and append the description (p)
-  const descP = document.createElement('p');
-  descP.className = 'description';
   
-  // Truncate long descriptions for the list view
-  const shortDescription = description.length > 150 
-    ? description.substring(0, 150) + '...' 
-    : description;
-  descP.textContent = shortDescription;
-  article.appendChild(descP);
-
-  // Create and append the "View Details" link
+  const h2 = document.createElement('h2');
+  h2.textContent = assignment.title;
+  article.appendChild(h2);
+  
+  const dueDatePara = document.createElement('p');
+  dueDatePara.textContent = `Due: ${assignment.dueDate}`;
+  article.appendChild(dueDatePara);
+  
+  const descriptionPara = document.createElement('p');
+  descriptionPara.textContent = assignment.description;
+  article.appendChild(descriptionPara);
+  
   const detailsLink = document.createElement('a');
-  detailsLink.href = `details.html?id=${id}`;
-  detailsLink.textContent = 'View Details';
-  detailsLink.className = 'view-details-btn';
+  detailsLink.href = `details.html?id=${assignment.id}`;
+  detailsLink.textContent = 'View Details & Discussion';
   article.appendChild(detailsLink);
-
+  
   return article;
 }
 
@@ -76,35 +60,28 @@ function createAssignmentArticle(assignment) {
  */
 async function loadAssignments() {
   try {
-    // Show loading state
-    if (listSection) {
-      listSection.innerHTML = '<p class="loading">Loading assignments...</p>';
-    }
-
-    const response = await fetch('assignments.json');
+    console.log('Loading assignments from: api/assignments.json');
+    
+    // FIXED: Use the correct path to your JSON file
+    const response = await fetch('api/assignments.json');
     
     if (!response.ok) {
-      throw new Error(`Failed to load assignments: ${response.status} ${response.statusText}`);
+      throw new Error(`Failed to load assignments: ${response.status}`);
     }
     
     const assignments = await response.json();
+    console.log('Loaded assignments:', assignments);
     
-    // Validate that we got an array
-    if (!Array.isArray(assignments)) {
-      throw new Error('Invalid data format: assignments data is not an array');
-    }
-    
-    // Clear section
+    // Clear the section (removes the hardcoded HTML assignments)
     if (listSection) {
       listSection.innerHTML = '';
       
-      // Handle empty assignments array
-      if (assignments.length === 0) {
-        listSection.innerHTML = '<p class="no-assignments">No assignments available.</p>';
+      if (!Array.isArray(assignments) || assignments.length === 0) {
+        listSection.innerHTML = '<p>No assignments available at this time.</p>';
         return;
       }
       
-      // Create and append articles for each assignment
+      // Create and append each assignment
       assignments.forEach(assignment => {
         const article = createAssignmentArticle(assignment);
         listSection.appendChild(article);
@@ -114,49 +91,46 @@ async function loadAssignments() {
   } catch (error) {
     console.error('Error loading assignments:', error);
     
-    // Show error message to user
+    // Show error to user
     if (listSection) {
       listSection.innerHTML = `
-        <div class="error-message">
-          <p>Unable to load assignments at this time.</p>
-          <p><small>Error: ${error.message}</small></p>
-          <button onclick="loadAssignments()" class="retry-btn">Try Again</button>
+        <div class="error">
+          <p>Unable to load assignments. Please try again later.</p>
+          <p><small>${error.message}</small></p>
         </div>
       `;
       
-      // Fallback: Load sample data if fetch fails
-      setTimeout(() => {
-        loadSampleData();
-      }, 2000);
+      // Fallback to sample data after showing error
+      setTimeout(loadSampleData, 2000);
     }
   }
 }
 
 /**
- * Fallback function to load sample data when JSON file is not available
+ * Fallback function with sample data matching your actual assignments
  */
 function loadSampleData() {
   const sampleAssignments = [
     {
-      id: 'asg_1',
-      title: 'HTML Basics',
-      dueDate: '2024-07-15',
-      description: 'Learn the fundamentals of HTML including tags, attributes, and document structure. Create a simple webpage using semantic HTML elements.'
+      id: "asg_1",
+      title: "Assignment 1: HTML Basics",
+      dueDate: "2025-11-10",
+      description: "Create a semantic HTML structure for a personal portfolio. Focus on using tags like <header>, <nav>, <main>, <article>, and <footer>."
     },
     {
-      id: 'asg_2', 
-      title: 'CSS Styling',
-      dueDate: '2024-07-22',
-      description: 'Explore CSS properties and selectors to style web pages. Practice using flexbox and grid for layout design.'
+      id: "asg_2",
+      title: "Assignment 2: CSS Styling", 
+      dueDate: "2025-11-17",
+      description: "Style your HTML portfolio using modern CSS. You must use Flexbox or Grid for layout and include at least one CSS animation."
     },
     {
-      id: 'asg_3',
-      title: 'JavaScript Fundamentals',
-      dueDate: '2024-07-29',
-      description: 'Introduction to JavaScript programming concepts including variables, functions, and DOM manipulation.'
+      id: "asg_3",
+      title: "Assignment 3: JavaScript Events",
+      dueDate: "2025-11-24",
+      description: "Make your portfolio interactive. Add event listeners to create a modal window for your projects and a theme switcher (light/dark mode)."
     }
   ];
-
+  
   if (listSection) {
     listSection.innerHTML = '';
     sampleAssignments.forEach(assignment => {
@@ -164,13 +138,12 @@ function loadSampleData() {
       listSection.appendChild(article);
     });
     
-    // Add a note that sample data is being used
+    // Add note about using sample data
     const note = document.createElement('p');
-    note.className = 'sample-data-note';
-    note.textContent = 'Note: Sample assignments are being displayed.';
     note.style.fontStyle = 'italic';
     note.style.color = '#666';
     note.style.marginTop = '20px';
+    note.textContent = 'Note: Displaying sample assignment data.';
     listSection.appendChild(note);
   }
 }
