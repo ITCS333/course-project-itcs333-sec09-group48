@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // ============================================================================
 
 // TODO: Include the database connection class
-require_once __DIR__. 'Database.php';
+require_once '../../config/Database.php';
 
 // TODO: Create database connection
 try {
@@ -141,32 +141,130 @@ $response = [
  * Response: JSON array of assignment objects
  */
 function getAllAssignments($db) {
-    // TODO: Start building the SQL query
+    // Start building the SQL query
+    $sql = "SELECT id, title, description, due_date, files, created_at, updated_at FROM assignments WHERE 1=1";
+    $params = [];
     
+    // Check if 'search' query parameter exists in $_GET
+    if (isset($_GET['search']) && !empty(trim($_GET['search']))) {
+        $searchTerm = trim($_GET['search']);
+        $sql .= " AND (title LIKE :search OR description LIKE :search)";
+        $params[':search'] = "%{$searchTerm}%";
+    }
     
-    // TODO: Check if 'search' query parameter exists in $_GET
+    // Check if 'sort' and 'order' query parameters exist
+    $allowedSortFields = ['title', 'due_date', 'created_at', 'updated_at'];
+    $defaultSortField = 'created_at';
+    $defaultOrder = 'DESC';
     
+    $sortField = $defaultSortField;
+    $sortOrder = $defaultOrder;
     
-    // TODO: Check if 'sort' and 'order' query parameters exist
+    if (isset($_GET['sort']) && in_array($_GET['sort'], $allowedSortFields)) {
+        $sortField = $_GET['sort'];
+    }
     
+    if (isset($_GET['order'])) {
+        $order = strtoupper($_GET['order']);
+        if ($order === 'ASC' || $order === 'DESC') {
+            $sortOrder = $order;
+        }
+    }
     
-    // TODO: Prepare the SQL statement using $db->prepare()
+    $sql .= " ORDER BY $sortField $sortOrder";
     
+    // Optional: Add pagination
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
+    $offset = ($page - 1) * $limit;
     
-    // TODO: Bind parameters if search is used
+    $sql .= " LIMIT :limit OFFSET :offset";
     
-    
-    // TODO: Execute the prepared statement
-    
-    
-    // TODO: Fetch all results as associative array
-    
-    
-    // TODO: For each assignment, decode the 'files' field from JSON to array
-    
-    
-    // TODO: Return JSON response
-    
+    try {
+        // Prepare the SQL statement using $db->prepare()
+        $stmt = $db->prepare($sql);
+        
+        // Bind parameters if search is used
+        if (isset($params[':search'])) {
+            $stmt->bindParam(':search', $params[':search'], PDO::PARAM_STR);
+        }
+        
+        // Bind pagination parameters
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        
+        // Execute the prepared statement
+        $stmt->execute();
+        
+        // Fetch all results as associative array
+        $assignments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // For each assignment, decode the 'files' field from JSON to array
+        foreach ($assignments as &$assignment) {
+            if (!empty($assignment['files'])) {
+                $decodedFiles = json_decode($assignment['files'], true);
+                $assignment['files'] = $decodedFiles !== null ? $decodedFiles : [];
+            } else {
+                $assignment['files'] = [];
+            }
+            
+            // Format dates for better readability
+            $assignment['due_date'] = $assignment['due_date'] ? date('Y-m-d', strtotime($assignment['due_date'])) : null;
+            $assignment['created_at'] = date('Y-m-d H:i:s', strtotime($assignment['created_at']));
+            $assignment['updated_at'] = $assignment['updated_at'] ? date('Y-m-d H:i:s', strtotime($assignment['updated_at'])) : null;
+            
+            // Get comment count for each assignment
+            $commentStmt = $db->prepare("SELECT COUNT(*) as comment_count FROM comments WHERE assignment_id = :assignment_id");
+            $commentStmt->bindParam(':assignment_id', $assignment['id'], PDO::PARAM_INT);
+            $commentStmt->execute();
+            $commentCount = $commentStmt->fetch(PDO::FETCH_ASSOC);
+            $assignment['comment_count'] = (int)$commentCount['comment_count'];
+        }
+        
+        // Get total count for pagination info
+        $countSql = "SELECT COUNT(*) as total FROM assignments";
+        if (isset($_GET['search']) && !empty(trim($_GET['search']))) {
+            $countSql .= " WHERE (title LIKE :search OR description LIKE :search)";
+        }
+        
+        $countStmt = $db->prepare($countSql);
+        if (isset($_GET['search']) && !empty(trim($_GET['search']))) {
+            $countStmt->bindValue(':search', "%{$searchTerm}%", PDO::PARAM_STR);
+        }
+        $countStmt->execute();
+        $totalResult = $countStmt->fetch(PDO::FETCH_ASSOC);
+        $totalCount = (int)$totalResult['total'];
+        
+        // Return JSON response
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true,
+            'data' => $assignments,
+            'pagination' => [
+                'page' => $page,
+                'limit' => $limit,
+                'total' => $totalCount,
+                'pages' => ceil($totalCount / $limit),
+                'has_next' => ($page * $limit) < $totalCount,
+                'has_previous' => $page > 1
+            ],
+            'meta' => [
+                'search_term' => isset($searchTerm) ? $searchTerm : null,
+                'sort_field' => $sortField,
+                'sort_order' => $sortOrder,
+                'total_fetched' => count($assignments)
+            ]
+        ], JSON_PRETTY_PRINT);
+        
+    } catch (PDOException $e) {
+        // Handle database errors
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Failed to fetch assignments',
+            'error' => $e->getMessage()
+        ]);
+    }
 }
 
 
@@ -181,29 +279,126 @@ function getAllAssignments($db) {
  * Response: JSON object with assignment details
  */
 function getAssignmentById($db, $assignmentId) {
-    // TODO: Validate that $assignmentId is provided and not empty
+    // Validate that $assignmentId is provided and not empty
+    if (empty($assignmentId) || !is_numeric($assignmentId) || $assignmentId <= 0) {
+        http_response_code(400); // Bad Request
+        echo json_encode([
+            'success' => false,
+            'message' => 'Invalid assignment ID. Please provide a valid positive numeric ID.'
+        ]);
+        return;
+    }
     
-    
-    // TODO: Prepare SQL query to select assignment by id
-    
-    
-    // TODO: Bind the :id parameter
-    
-    
-    // TODO: Execute the statement
-    
-    
-    // TODO: Fetch the result as associative array
-    
-    
-    // TODO: Check if assignment was found
-    
-    
-    // TODO: Decode the 'files' field from JSON to array
-    
-    
-    // TODO: Return success response with assignment data
-    
+    try {
+        // Prepare SQL query to select assignment by id
+        $sql = "SELECT 
+                    a.id, 
+                    a.title, 
+                    a.description, 
+                    a.due_date, 
+                    a.files, 
+                    a.created_at, 
+                    a.updated_at
+                FROM assignments a 
+                WHERE a.id = :id
+                LIMIT 1";
+        
+        $stmt = $db->prepare($sql);
+        
+        // Bind the :id parameter
+        $stmt->bindParam(':id', $assignmentId, PDO::PARAM_INT);
+        
+        // Execute the statement
+        $stmt->execute();
+        
+        // Fetch the result as associative array
+        $assignment = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Check if assignment was found
+        if (!$assignment) {
+            http_response_code(404); // Not Found
+            echo json_encode([
+                'success' => false,
+                'message' => "Assignment with ID {$assignmentId} not found."
+            ]);
+            return;
+        }
+        
+        // Decode the 'files' field from JSON to array
+        if (!empty($assignment['files'])) {
+            $decodedFiles = json_decode($assignment['files'], true);
+            $assignment['files'] = $decodedFiles !== null ? $decodedFiles : [];
+        } else {
+            $assignment['files'] = [];
+        }
+        
+        // Format dates for better readability
+        $assignment['due_date'] = $assignment['due_date'] ? date('Y-m-d', strtotime($assignment['due_date'])) : null;
+        $assignment['created_at'] = date('Y-m-d H:i:s', strtotime($assignment['created_at']));
+        $assignment['updated_at'] = $assignment['updated_at'] ? date('Y-m-d H:i:s', strtotime($assignment['updated_at'])) : null;
+        
+        // Get comments for this assignment
+        $commentsSql = "SELECT 
+                            c.id, 
+                            c.assignment_id, 
+                            c.author, 
+                            c.text, 
+                            c.created_at
+                        FROM comments c 
+                        WHERE c.assignment_id = :assignment_id
+                        ORDER BY c.created_at DESC";
+        
+        $commentsStmt = $db->prepare($commentsSql);
+        $commentsStmt->bindParam(':assignment_id', $assignmentId, PDO::PARAM_INT);
+        $commentsStmt->execute();
+        $comments = $commentsStmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Format comment dates
+        foreach ($comments as &$comment) {
+            $comment['created_at'] = date('Y-m-d H:i:s', strtotime($comment['created_at']));
+        }
+        
+        // Add comments to the assignment response
+        $assignment['comments'] = $comments;
+        $assignment['comment_count'] = count($comments);
+        
+        // Calculate days until due (if due_date is in the future)
+        if ($assignment['due_date']) {
+            $dueDate = new DateTime($assignment['due_date']);
+            $today = new DateTime();
+            $interval = $today->diff($dueDate);
+            
+            $assignment['days_until_due'] = $interval->days;
+            $assignment['is_overdue'] = $today > $dueDate;
+            $assignment['due_status'] = $today > $dueDate ? 'overdue' : ($interval->days <= 3 ? 'soon' : 'future');
+        }
+        
+        // Return success response with assignment data
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'message' => 'Assignment retrieved successfully',
+            'data' => $assignment
+        ], JSON_PRETTY_PRINT);
+        
+    } catch (PDOException $e) {
+        // Handle database errors
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Database error occurred while fetching assignment',
+            'error' => $e->getMessage(),
+            'error_code' => $e->getCode()
+        ]);
+    } catch (Exception $e) {
+        // Handle any other errors
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'An error occurred',
+            'error' => $e->getMessage()
+        ]);
+    }
 }
 
 
