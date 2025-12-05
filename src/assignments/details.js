@@ -19,267 +19,326 @@
 
 // --- Global Data Store ---
 // These will hold the data related to *this* assignment.
-let currentAssignmentId = null;
-let currentComments = [];
+// details.js - Show ALL assignments with their comments
+let allAssignments = [];
+let allComments = {};
 
-// --- Element Selections ---
-// TODO: Select all the elements you added IDs for in step 2.
-
-const assignmentTitle = document.getElementById('assignment-title');
-const assignmentDueDate = document.getElementById('assignment-due-date');
-const assignmentDescription = document.getElementById('assignment-description'); // Fixed typo: removed space
-const assignmentFilesList = document.getElementById('assignment-files-list');
-const commentList = document.getElementById('comment-list');
-const commentForm = document.getElementById('comment-form');
-const newCommentText = document.getElementById('new-comment-text');
-
-// --- Functions ---
+// Element selections
+const pageTitle = document.getElementById('page-title');
+const assignmentsContainer = document.getElementById('assignments-container');
 
 /**
- * TODO: Implement the getAssignmentIdFromURL function.
- * It should:
- * 1. Get the query string from `window.location.search`.
- * 2. Use the `URLSearchParams` object to get the value of the 'id' parameter.
- * 3. Return the id.
+ * Create HTML for a single assignment with its comments
  */
-function getAssignmentIdFromURL() {
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  return urlParams.get('id');
-}
-
-/**
- * TODO: Implement the renderAssignmentDetails function.
- * It takes one assignment object.
- * It should:
- * 1. Set the `textContent` of `assignmentTitle` to the assignment's title.
- * 2. Set the `textContent` of `assignmentDueDate` to "Due: " + assignment's dueDate.
- * 3. Set the `textContent` of `assignmentDescription`.
- * 4. Clear `assignmentFilesList` and then create and append
- * `<li><a href="#">...</a></li>` for each file in the assignment's 'files' array.
- */
-function renderAssignmentDetails(assignment) {
-  // Set basic assignment information
-  assignmentTitle.textContent = assignment.title;
-  assignmentDueDate.textContent = `Due: ${assignment.dueDate}`;
-  assignmentDescription.textContent = assignment.description;
-  
-  // Clear and rebuild files list
-  assignmentFilesList.innerHTML = '';
-  
-  // Handle case where there are no files
-  if (!assignment.files || assignment.files.length === 0) {
-    const li = document.createElement('li');
-    li.textContent = 'No files attached';
-    li.className = 'no-files';
-    assignmentFilesList.appendChild(li);
-    return;
-  }
-  
-  // Create file list items - handle both string format and object format
-  assignment.files.forEach(file => {
-    const li = document.createElement('li');
+function createAssignmentSection(assignment) {
+    const section = document.createElement('section');
+    section.className = 'assignment-section';
+    section.id = `assignment-${assignment.id}`;
     
-    // Handle different file formats:
-    // - If file is a string (from your HTML form), treat it as URL
-    // - If file is an object with url/name properties, use those
-    if (typeof file === 'string') {
-      const a = document.createElement('a');
-      a.href = file.startsWith('http') ? file : `#${file}`;
-      a.textContent = file;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      li.appendChild(a);
-    } else if (file.url) {
-      const a = document.createElement('a');
-      a.href = file.url;
-      a.textContent = file.name || file.url;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      li.appendChild(a);
+    // Assignment header
+    const header = document.createElement('div');
+    header.className = 'assignment-header';
+    
+    const title = document.createElement('h2');
+    title.textContent = assignment.title;
+    
+    const dueDate = document.createElement('p');
+    dueDate.className = 'due-date';
+    dueDate.textContent = `Due: ${assignment.dueDate}`;
+    
+    const description = document.createElement('p');
+    description.className = 'description';
+    description.textContent = assignment.description;
+    
+    // Files list
+    const filesTitle = document.createElement('h3');
+    filesTitle.textContent = 'Attached Files:';
+    
+    const filesList = document.createElement('ul');
+    filesList.className = 'files-list';
+    
+    if (assignment.files && assignment.files.length > 0) {
+        assignment.files.forEach(file => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = '#';
+            a.textContent = file;
+            a.onclick = (e) => {
+                e.preventDefault();
+                alert(`Would download: ${file}`);
+            };
+            li.appendChild(a);
+            filesList.appendChild(li);
+        });
     } else {
-      // Fallback: just display as text
-      li.textContent = file;
+        const li = document.createElement('li');
+        li.textContent = 'No files attached';
+        filesList.appendChild(li);
     }
     
-    assignmentFilesList.appendChild(li);
-  });
+    // Comments section for this assignment
+    const commentsSection = document.createElement('div');
+    commentsSection.className = 'comments-section';
+    
+    const commentsTitle = document.createElement('h3');
+    commentsTitle.textContent = 'Questions & Discussion:';
+    
+    const commentsList = document.createElement('div');
+    commentsList.className = 'comments-list';
+    commentsList.id = `comments-${assignment.id}`;
+    
+    // Comment form for this assignment
+    const commentForm = document.createElement('form');
+    commentForm.className = 'comment-form';
+    commentForm.dataset.assignmentId = assignment.id;
+    
+    const fieldset = document.createElement('fieldset');
+    const legend = document.createElement('legend');
+    legend.textContent = 'Add a Comment';
+    
+    const textarea = document.createElement('textarea');
+    textarea.placeholder = 'Type your question or comment here...';
+    textarea.required = true;
+    
+    const submitButton = document.createElement('button');
+    submitButton.type = 'submit';
+    submitButton.textContent = 'Post Comment';
+    
+    fieldset.appendChild(legend);
+    fieldset.appendChild(textarea);
+    fieldset.appendChild(submitButton);
+    commentForm.appendChild(fieldset);
+    
+    // Assemble everything
+    header.appendChild(title);
+    header.appendChild(dueDate);
+    header.appendChild(description);
+    
+    commentsSection.appendChild(commentsTitle);
+    commentsSection.appendChild(commentsList);
+    commentsSection.appendChild(commentForm);
+    
+    section.appendChild(header);
+    section.appendChild(filesTitle);
+    section.appendChild(filesList);
+    section.appendChild(commentsSection);
+    
+    return section;
 }
 
 /**
- * TODO: Implement the createCommentArticle function.
- * It takes one comment object {author, text}.
- * It should return an <article> element matching the structure in `details.html`.
+ * Render comments for a specific assignment
  */
-function createCommentArticle(comment) {
-  const { author, text } = comment;
-
-  // Create elements
-  const article = document.createElement('article');
-  const authorP = document.createElement('p');
-  const textP = document.createElement('p');
-  
-  // Set attributes and content
-  article.className = 'comment';
-  authorP.className = 'comment-author';
-  authorP.textContent = author;
-  textP.className = 'comment-text';
-  textP.textContent = text;
-  
-  // Build structure
-  article.append(authorP, textP);
-  
-  return article;
+function renderCommentsForAssignment(assignmentId) {
+    const commentsList = document.getElementById(`comments-${assignmentId}`);
+    if (!commentsList) return;
+    
+    commentsList.innerHTML = '';
+    
+    const comments = allComments[assignmentId] || [];
+    
+    if (comments.length === 0) {
+        const noComments = document.createElement('p');
+        noComments.className = 'no-comments';
+        noComments.textContent = 'No comments yet. Be the first to comment!';
+        commentsList.appendChild(noComments);
+        return;
+    }
+    
+    comments.forEach(comment => {
+        const commentElement = createCommentElement(comment);
+        commentsList.appendChild(commentElement);
+    });
 }
 
 /**
- * TODO: Implement the renderComments function.
- * It should:
- * 1. Clear the `commentList`.
- * 2. Loop through the global `currentComments` array.
- * 3. For each comment, call `createCommentArticle()`, and
- * append the resulting <article> to `commentList`.
+ * Create a single comment element
  */
-function renderComments() {
-  commentList.innerHTML = '';
-  
-  // Handle case where there are no comments
-  if (!currentComments || currentComments.length === 0) {
-    const noCommentsMsg = document.createElement('p');
-    noCommentsMsg.textContent = 'No comments yet. Be the first to comment!';
-    noCommentsMsg.className = 'no-comments';
-    commentList.appendChild(noCommentsMsg);
-    return;
-  }
-  
-  currentComments.forEach(comment => {
-    const commentArticle = createCommentArticle(comment);
-    commentList.appendChild(commentArticle);
-  });
+function createCommentElement(comment) {
+    const article = document.createElement('article');
+    article.className = 'comment';
+    
+    const text = document.createElement('p');
+    text.className = 'comment-text';
+    text.textContent = comment.text;
+    
+    const author = document.createElement('footer');
+    author.className = 'comment-author';
+    author.textContent = `Posted by: ${comment.author}`;
+    
+    article.appendChild(text);
+    article.appendChild(author);
+    
+    return article;
 }
 
 /**
- * TODO: Implement the handleAddComment function.
- * This is the event handler for the `commentForm` 'submit' event.
- * It should:
- * 1. Prevent the form's default submission.
- * 2. Get the text from `newCommentText.value`.
- * 3. If the text is empty, return.
- * 4. Create a new comment object: { author: 'Student', text: commentText }
- * (For this exercise, 'Student' is a fine hardcoded author).
- * 5. Add the new comment to the global `currentComments` array (in-memory only).
- * 6. Call `renderComments()` to refresh the list.
- * 7. Clear the `newCommentText` textarea.
+ * Handle adding a new comment to a specific assignment
  */
-function handleAddComment(event) {
-  event.preventDefault();
-  const commentText = newCommentText.value.trim();
-  if (commentText === '') return;
-  
-  const newComment = {
-    author: 'Student', 
-    text: commentText,
-    timestamp: new Date().toISOString() // Optional: add timestamp
-  };
-  
-  currentComments.push(newComment);
-  renderComments();
-  newCommentText.value = '';
+function handleAddComment(event, assignmentId) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const textarea = form.querySelector('textarea');
+    const commentText = textarea.value.trim();
+    
+    if (!commentText) {
+        alert('Please enter a comment before posting.');
+        return;
+    }
+    
+    // Create new comment
+    const newComment = {
+        author: 'Student',
+        text: commentText,
+        timestamp: new Date().toISOString()
+    };
+    
+    // Add to comments data
+    if (!allComments[assignmentId]) {
+        allComments[assignmentId] = [];
+    }
+    allComments[assignmentId].push(newComment);
+    
+    // Re-render comments for this assignment
+    renderCommentsForAssignment(assignmentId);
+    
+    // Clear form
+    textarea.value = '';
+    
+    // Show success message
+    const successMsg = document.createElement('div');
+    successMsg.className = 'success-message';
+    successMsg.textContent = 'Comment posted successfully!';
+    form.parentNode.insertBefore(successMsg, form);
+    
+    setTimeout(() => {
+        if (successMsg.parentNode) {
+            successMsg.parentNode.removeChild(successMsg);
+        }
+    }, 3000);
 }
 
 /**
- * TODO: Implement an `initializePage` function.
- * This function needs to be 'async'.
- * It should:
- * 1. Get the `currentAssignmentId` by calling `getAssignmentIdFromURL()`.
- * 2. If no ID is found, display an error and stop.
- * 3. `fetch` both 'assignments.json' and 'comments.json' (you can use `Promise.all`).
- * 4. Find the correct assignment from the assignments array using the `currentAssignmentId`.
- * 5. Get the correct comments array from the comments object using the `currentAssignmentId`.
- * Store this in the global `currentComments` variable.
- * 6. If the assignment is found:
- * - Call `renderAssignmentDetails()` with the assignment object.
- * - Call `renderComments()` to show the initial comments.
- * - Add the 'submit' event listener to `commentForm` (calls `handleAddComment`).
- * 7. If the assignment is not found, display an error.
+ * Render all assignments
+ */
+function renderAllAssignments() {
+    assignmentsContainer.innerHTML = '';
+    
+    if (allAssignments.length === 0) {
+        assignmentsContainer.innerHTML = '<p>No assignments found.</p>';
+        return;
+    }
+    
+    allAssignments.forEach(assignment => {
+        const assignmentSection = createAssignmentSection(assignment);
+        assignmentsContainer.appendChild(assignmentSection);
+        
+        // Add event listener to the form for this assignment
+        const form = assignmentSection.querySelector('.comment-form');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                handleAddComment(e, assignment.id);
+            });
+        }
+        
+        // Render comments for this assignment
+        renderCommentsForAssignment(assignment.id);
+    });
+}
+
+/**
+ * Main initialization function
  */
 async function initializePage() {
-  currentAssignmentId = getAssignmentIdFromURL();
-  
-  if (!currentAssignmentId) {
-    assignmentTitle.textContent = 'Error: No assignment ID provided in URL.';
-    return;
-  }
-  
-  try {
-    // For demo purposes, use sample data if JSON files don't exist
-    let assignments = [];
-    let commentsData = {};
-    
     try {
-      const [assignmentsRes, commentsRes] = await Promise.all([
-        fetch('assignments.json'),
-        fetch('comments.json')
-      ]);
-      
-      if (assignmentsRes.ok) {
-        assignments = await assignmentsRes.json();
-      }
-      
-      if (commentsRes.ok) {
-        commentsData = await commentsRes.json();
-      }
-    } catch (fetchError) {
-      console.warn('Could not load JSON files, using sample data:', fetchError);
-      // Fallback to sample data
-      assignments = [
-        { 
-          id: 'asg_1', 
-          title: 'HTML Basics', 
-          dueDate: '2024-07-15', 
-          description: 'Learn basic HTML tags and structure', 
-          files: ['https://example.com/html-guide.pdf', 'https://example.com/tutorial.html']
-        },
-        { 
-          id: 'asg_2', 
-          title: 'CSS Styling', 
-          dueDate: '2024-07-22', 
-          description: 'Style web pages with CSS', 
-          files: ['https://example.com/css-cheatsheet.pdf']
+        console.log('Loading all assignments and comments...');
+        
+        // Fetch all data
+        const [assignmentsRes, commentsRes] = await Promise.all([
+            fetch('api/assignments.json'),
+            fetch('api/comments.json')
+        ]);
+        
+        if (!assignmentsRes.ok) {
+            throw new Error(`Failed to load assignments: ${assignmentsRes.status}`);
         }
-      ];
-      
-      commentsData = {
-        'asg_1': [
-          { author: 'Student', text: 'Great assignment! Learned a lot about HTML structure.' },
-          { author: 'Teacher', text: 'Remember to validate your HTML using the W3C validator.' }
-        ],
-        'asg_2': [
-          { author: 'Student', text: 'CSS is challenging but fun!' }
-        ]
-      };
+        
+        allAssignments = await assignmentsRes.json();
+        console.log('Loaded assignments:', allAssignments);
+        
+        // Load comments if available
+        if (commentsRes.ok) {
+            allComments = await commentsRes.json();
+            console.log('Loaded comments:', allComments);
+        } else {
+            console.log('No comments file found, starting with empty comments');
+            allComments = {};
+        }
+        
+        // Initialize empty comments for assignments that don't have any
+        allAssignments.forEach(assignment => {
+            if (!allComments[assignment.id]) {
+                allComments[assignment.id] = [];
+            }
+        });
+        
+        // Render everything
+        renderAllAssignments();
+        
+        console.log('Page initialized successfully!');
+        
+    } catch (error) {
+        console.error('Error loading data:', error);
+        
+        // Show fallback data for testing
+        assignmentsContainer.innerHTML = `
+            <div class="error">
+                <h2>Error Loading Data</h2>
+                <p>${error.message}</p>
+                <p>Using sample data for demonstration...</p>
+            </div>
+        `;
+        
+        // Use sample data
+        allAssignments = [
+            {
+                id: "asg_1",
+                title: "Assignment 1: HTML Basics",
+                description: "Create a semantic HTML structure for a personal portfolio. Focus on using tags like <header>, <nav>, <main>, <article>, and <footer>.",
+                dueDate: "2025-11-10",
+                files: ["portfolio-requirements.pdf", "examples.zip"]
+            },
+            {
+                id: "asg_2",
+                title: "Assignment 2: CSS Styling",
+                description: "Style your HTML portfolio using modern CSS. You must use Flexbox or Grid for layout and include at least one CSS animation.",
+                dueDate: "2025-11-17",
+                files: ["style-guide.pdf"]
+            },
+            {
+                id: "asg_3",
+                title: "Assignment 3: JavaScript Events",
+                description: "Make your portfolio interactive. Add event listeners to create a modal window for your projects and a theme switcher (light/dark mode).",
+                dueDate: "2025-11-24",
+                files: ["js-requirements.pdf", "event-listeners-guide.txt"]
+            }
+        ];
+        
+        allComments = {
+            "asg_1": [
+                { author: "Fatema Ahmed", text: "Is it okay to use a 'section' inside an 'article'?" },
+                { author: "Mohamed Abdulla", text: "Can we use a CSS framework for this first assignment?" }
+            ],
+            "asg_2": [
+                { author: "Noora Salman", text: "Having trouble with Flexbox. Any good tutorials?" }
+            ],
+            "asg_3": []
+        };
+        
+        renderAllAssignments();
     }
-    
-    const assignment = assignments.find(a => a.id === currentAssignmentId);
-    currentComments = commentsData[currentAssignmentId] || [];
-    
-    if (assignment) {
-      renderAssignmentDetails(assignment);
-      renderComments();
-      
-      if (commentForm) {
-        commentForm.addEventListener('submit', handleAddComment);
-      }
-    } else {
-      assignmentTitle.textContent = 'Error: Assignment not found.';
-      assignmentDueDate.textContent = '';
-      assignmentDescription.textContent = '';
-    }
-  } catch (error) {
-    assignmentTitle.textContent = 'Error loading assignment data.';
-    console.error('Error initializing page:', error);
-  }
 }
 
-// --- Initial Page Load ---
+// Start the page
 initializePage();

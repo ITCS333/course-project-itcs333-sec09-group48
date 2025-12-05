@@ -21,10 +21,6 @@
     <link rel="stylesheet" href="../common/styles.css">
 
     <button id="darkModeToggle" class="dark-mode-btn">🌙 Dark Mode</button>
-
-    <!--javaScript file-->
-    <script src="./admin.js" defer></script>
-
 </head>
 
 <body>
@@ -106,8 +102,8 @@
                         <td>Chapter 1 Notes</td>
                         <td> Introduction to HTML</td> <!--description -->
                         <td>
-                            <button class="edit-btn">Edit</button>
-                            <button class="delete-btn">Delete</button>
+                            <button class="edit-btn" data-id="dummy1">Edit</button>
+                            <button class="delete-btn" data-id="dummy1">Delete</button>
                         </td>
                     </tr>
                     <!-- Example Row 2: -->
@@ -119,8 +115,8 @@
                         <td>Chapter 2 Notes </td>
                         <td> Basic CSS Styling </td>
                         <td>
-                            <button class="edit-btn">Edit</button>
-                            <button class="delete-btn">Delete</button>
+                            <button class="edit-btn" data-id="dummy2">Edit</button>
+                            <button class="delete-btn" data-id="dummy2">Delete</button>
                         </td>
                     </tr>
                     <!-- End of tbody. -->
@@ -134,4 +130,5 @@
     <script src="../common/dark-mode.js"></script>
 
 </body>
+<script src="admin.js" ></script>
 </html>
