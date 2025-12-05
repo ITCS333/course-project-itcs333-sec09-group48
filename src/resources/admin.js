@@ -20,7 +20,7 @@ let resources = [];
 const resourceForm = document.getElementById('resource-form');
 // TODO: Select the resources table body ('#resources-tbody').
 const resourceTable = document.getElementById('resources-tbody')
-  
+
 // --- Functions ---
 
 /**
@@ -77,7 +77,7 @@ function renderTable() {
   resources.forEach(resource => {
     const row = createResourceRow(resource);
     resourceTable.appendChild(row);
-    
+
   });
 }
 
@@ -127,12 +127,12 @@ function handleAddResource(event) {
  */
 function handleTableClick(event) {
   // ... your implementation here ...
-  const target = event.target; 
-  if (target.classList.contains('delete-btn')){
+  const target = event.target;
+  if (target.classList.contains('delete-btn')) {
     const resId = target.getAttribute('data-id');
     resources = resources.filter(re => re.id !== resId);
     renderTable();
-  } 
+  }
 }
 
 /**
@@ -147,17 +147,19 @@ function handleTableClick(event) {
  */
 async function loadAndInitialize() {
   // ... your implementation here ...
-  try{
-    const res = await fetch('resources.json'); 
-  resources = await res.json();
-  renderTable();
-  resourceForm.addEventListener('submit',handleAddResource);
-  resourceTable.addEventListener('click', handleTableClick);
+  try {
+    const res = await fetch('./api/resources.json');
+    if (!res.ok) throw new Error(`Failed to load resources.json: ${res.status} ${res.statusText}`);
+    console.log(`Fetched resources.json: ${res.status}`);
+    resources = await res.json();
+    renderTable();
+    resourceForm.addEventListener('submit', handleAddResource);
+    resourceTable.addEventListener('click', handleTableClick);
   }
-  catch(error){
+  catch (error) {
     console.error('Error', error);
   }
-  
+
 }
 
 // --- Initial Page Load ---
