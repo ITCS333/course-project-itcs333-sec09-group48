@@ -19,8 +19,8 @@ let resources = [];
 // TODO: Select the resource form ('#resource-form').
 const resourceForm = document.getElementById('resource-form');
 // TODO: Select the resources table body ('#resources-tbody').
-const resourceTable = document.getElementById('resource-tbody')
-
+const resourceTable = document.getElementById('resources-tbody')
+  
 // --- Functions ---
 
 /**
@@ -75,8 +75,9 @@ function renderTable() {
   // ... your implementation here ...
   resourceTable.innerHTML = '';
   resources.forEach(resource => {
-    const rows = createResourceRow(resource);
-    renderTable.appendChild(rows);
+    const row = createResourceRow(resource);
+    resourceTable.appendChild(row);
+    
   });
 }
 
@@ -126,7 +127,7 @@ function handleAddResource(event) {
  */
 function handleTableClick(event) {
   // ... your implementation here ...
-  const target =event.target(); 
+  const target = event.target; 
   if (target.classList.contains('delete-btn')){
     const resId = target.getAttribute('data-id');
     resources = resources.filter(re => re.id !== resId);
