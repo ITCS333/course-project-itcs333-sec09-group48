@@ -40,36 +40,6 @@
  * Database Connection Class
  * Provides PDO connection to MySQL database
  */
-class Database {
-    private $host = "localhost";
-    private $db_name = "course_assignments";
-    private $username = "root";
-    private $password = "";
-    private $conn;
-    
-    /**
-     * Get database connection
-     * @return PDO - Database connection object
-     */
-    public function getConnection() {
-        $this->conn = null;
-        
-        try {
-            $this->conn = new PDO(
-                "mysql:host=" . $this->host . ";dbname=" . $this->db_name . ";charset=utf8mb4",
-                $this->username,
-                $this->password
-            );
-            
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            
-        } catch(PDOException $e) {
-            throw new Exception("Connection error: " . $e->getMessage());
-        }
-        
-        return $this->conn;
-    }
-}
 
 // ============================================================================
 // HEADERS AND CORS CONFIGURATION

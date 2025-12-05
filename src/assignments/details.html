@@ -1,26 +1,56 @@
-<!--
-  Requirement: Create the Dedicated Page for a Single Assignment
 
-  Instructions:
-  This page displays the full details for one assignment and allows for discussion.
--->
-<<!-- details.html - Updated for showing all assignments -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Assignments & Discussions</title>
+    <title>Assignment Details</title>
     <link rel="stylesheet" href="../common/styles.css">
     <script src="details.js" defer></script>
 </head>
 <body>
     <header>
-        <h1 id="page-title">All Assignments & Discussions</h1>
+        
+        <h1 id="assignment-title">Assignment Details</h1>
+        <button id="back-button" onclick="window.history.back()">← Back to Assignments</button>
     </header>
     
-    <main id="assignments-container">
-        <!-- Assignments will be dynamically inserted here -->
+    <main>
+        
+        <article>
+            
+            <p id="assignment-due-date">Due: Loading...</p>
+            
+            <h2>Description</h2>
+            
+            <p id="assignment-description">Loading assignment details...</p>
+            
+            <h2>Attached Files & Links</h2>
+            
+            <ul id="assignment-files-list">
+                <li>Loading files...</li>
+            </ul>
+        </article>
+        
+        
+        <section id="discussion-forum">
+            <h2>Questions & Discussion</h2>
+            
+            
+            <div id="comment-list">
+                <p>Loading comments...</p>
+            </div>
+            
+            
+            <form action="#" id="comment-form">
+                <fieldset>
+                    <legend>Ask a Question or Add a Comment</legend>
+                    <label for="new-comment-text">Your Comment:</label>
+                    <textarea id="new-comment-text" placeholder="Type your question or comment here..." required></textarea>
+                    <button type="submit">Post Comment</button>
+                </fieldset>
+            </form>
+        </section>
     </main>
 </body>
 </html>
