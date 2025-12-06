@@ -132,6 +132,14 @@ function handleTableClick(event) {
     const resId = target.getAttribute('data-id');
     resources = resources.filter(re => re.id !== resId);
     renderTable();
+  } else if (target.classList.contains('edit-btn')) {
+    const resId = target.getAttribute('data-id');
+    const resource = resources.find(re => re.id === resId);
+    if (resource) {
+      document.getElementById('resource-title').value = resource.title;
+      document.getElementById('resource-description').value = resource.description;
+      document.getElementById('resource-link').value = resource.link || '';
+    }
   }
 }
 
