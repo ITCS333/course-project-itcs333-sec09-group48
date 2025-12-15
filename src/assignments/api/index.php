@@ -1,4 +1,10 @@
 <?php
+
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+
 /**
  * Assignment Management API
  * 
@@ -61,8 +67,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 
-// Initialize session if needed
-session_start();
 
 // ============================================================================
 // DATABASE CONNECTION
