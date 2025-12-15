@@ -60,6 +60,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
+
+// Initialize session if needed
+session_start();
+// Initialize session if needed
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = 'api_user_' . time(); // Create a unique user ID
+    $_SESSION['authenticated'] = true;
+    $_SESSION['last_api_call'] = date('Y-m-d H:i:s');
+}
+
 // ============================================================================
 // DATABASE CONNECTION
 // ============================================================================
