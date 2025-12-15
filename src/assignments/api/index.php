@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Include the database connection class
 require_once '../../common/config.php';
 
-/** @var PDO $pdo - defined in config.php */
+// Get PDO database connection from config
 $conn = $pdo;
 
 // ============================================================================

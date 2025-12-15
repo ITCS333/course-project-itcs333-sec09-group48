@@ -234,7 +234,7 @@ async function initializePage() {
     // Try to load from PHP API first
     try {
       // Load assignment data from PHP API
-      const assignmentRes = await fetch(`api/?resource=assignments&id=${currentAssignmentId}`);
+      const assignmentRes = await fetch(`api.php?resource=assignments&id=${currentAssignmentId}`);
       
       if (assignmentRes.ok) {
         const assignmentData = await assignmentRes.json();
@@ -242,7 +242,7 @@ async function initializePage() {
           currentAssignment = assignmentData.data;
           
           // Load comments from PHP API
-          const commentsRes = await fetch(`api/?resource=comments&assignment_id=${currentAssignmentId}`);
+          const commentsRes = await fetch(`api.php?resource=comments&assignment_id=${currentAssignmentId}`);
           if (commentsRes.ok) {
             const commentsData = await commentsRes.json();
             if (commentsData.success) {

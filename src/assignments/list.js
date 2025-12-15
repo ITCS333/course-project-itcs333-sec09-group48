@@ -116,6 +116,48 @@ async function loadAssignments() {
   }
 }
 
+/**
+ * Fallback function with sample data matching your actual assignments
+ */
+function loadSampleData() {
+  const sampleAssignments = [
+    {
+      id: "asg_1",
+      title: "Assignment 1: HTML Basics",
+      dueDate: "2025-11-10",
+      description: "Create a semantic HTML structure for a personal portfolio. Focus on using tags like <header>, <nav>, <main>, <article>, and <footer>."
+    },
+    {
+      id: "asg_2",
+      title: "Assignment 2: CSS Styling", 
+      dueDate: "2025-11-17",
+      description: "Style your HTML portfolio using modern CSS. You must use Flexbox or Grid for layout and include at least one CSS animation."
+    },
+    {
+      id: "asg_3",
+      title: "Assignment 3: JavaScript Events",
+      dueDate: "2025-11-24",
+      description: "Make your portfolio interactive. Add event listeners to create a modal window for your projects and a theme switcher (light/dark mode)."
+    }
+  ];
+  
+  if (listSection) {
+    listSection.innerHTML = '';
+    sampleAssignments.forEach(assignment => {
+      const article = createAssignmentArticle(assignment);
+      listSection.appendChild(article);
+    });
+    
+    // Add note about using sample data
+    const note = document.createElement('p');
+    note.style.fontStyle = 'italic';
+    note.style.color = '#666';
+    note.style.marginTop = '20px';
+    note.textContent = 'Note: Displaying sample assignment data.';
+    listSection.appendChild(note);
+  }
+}
+
 // --- Initial Page Load ---
 // Call the function to populate the page.
 loadAssignments();
