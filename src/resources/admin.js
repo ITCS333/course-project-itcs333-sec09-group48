@@ -14,6 +14,7 @@
 // --- Global Data Store ---
 // This will hold the resources loaded from the JSON file.
 let resources = [];
+let editingId = null;
 
 // --- Element Selections ---
 // TODO: Select the resource form ('#resource-form').
@@ -101,14 +102,32 @@ function handleAddResource(event) {
   const description = document.getElementById('resource-description').value;
   const link = document.getElementById('resource-link').value;
 
-  const newResource = {
-    id: `res_${Date.now()}`,
-    title,
-    description,
-    link
-  };
+    if (editingId) {
+   
+    const index = resources.findIndex(res => res.id === editingId);
+    if (index !== -1) {
+      resources[index] = {
+        id: editingId,
+        title,
+        description,
+        link
+      };
+    }
+   
+    editingId = null;
+    
+    document.getElementById('add-resource').textContent = 'Add Resource';
+  } else {
+    
+    const newResource = {
+      id: `res_${Date.now()}`,
+      title,
+      description,
+      link
+    };
+    resources.push(newResource);
+  }
 
-  resources.push(newResource);
   renderTable();
   resourceForm.reset();
 }
@@ -128,10 +147,32 @@ function handleAddResource(event) {
 function handleTableClick(event) {
   // ... your implementation here ...
   const target = event.target;
+  
   if (target.classList.contains('delete-btn')) {
     const resId = target.getAttribute('data-id');
     resources = resources.filter(re => re.id !== resId);
     renderTable();
+    
+   
+    if (editingId === resId) {
+      resourceForm.reset();
+      editingId = null;
+      document.getElementById('add-resource').textContent = 'Add Resource';
+    }
+  } else if (target.classList.contains('edit-btn')) {
+    const resId = target.getAttribute('data-id');
+    const resource = resources.find(re => re.id === resId);
+    
+    if (resource) {
+      
+      document.getElementById('resource-title').value = resource.title;
+      document.getElementById('resource-description').value = resource.description;
+      document.getElementById('resource-link').value = resource.link || '';
+      
+      
+      editingId = resId;
+      document.getElementById('add-resource').textContent = 'Update Resource';
+    }
   }
 }
 

@@ -5,14 +5,16 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Poppins', sans-serif;
-  background-color: #F8F5EF; /* Beige background */
+  background-color: #F8F5EF;
+  /* Beige background */
   color: #555;
   line-height: 1.6;
 }
 
 /* === Header === */
 header {
-  background-color: #7B8A78; /* olive green */
+  background-color: #7B8A78;
+  /* olive green */
   color: white;
   text-align: center;
   padding: 60px 20px;
@@ -31,12 +33,14 @@ main {
   margin: 60px auto;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   padding: 50px;
 }
 
 /* === Section Titles === */
-h2, h3, legend {
+h2,
+h3,
+legend {
   font-family: 'Playfair Display', serif;
   color: #7B8A78;
   margin-bottom: 20px;
@@ -76,7 +80,7 @@ nav ul li a {
   font-weight: 500;
   font-size: 1.05rem;
   display: block;
-  font-family: 'Playfair Display', serif; 
+  font-family: 'Playfair Display', serif;
 }
 
 nav ul li:hover a {
@@ -93,7 +97,7 @@ fieldset {
   border-radius: 10px;
   padding: 25px 70px;
   background-color: #FDFBF8;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.05); 
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
 }
 
 legend {
@@ -123,7 +127,8 @@ input:focus {
 }
 
 /* === Buttons === */
-button, .button {
+button,
+.button {
   background-color: #7B8A78;
   color: white;
   border: none;
@@ -135,7 +140,8 @@ button, .button {
   transition: background-color 0.3s ease;
 }
 
-button:hover, .button:hover {
+button:hover,
+.button:hover {
   background-color: #6a7867;
 }
 
@@ -155,14 +161,28 @@ button:hover, .button:hover {
 }
 
 /* === Tables === */
+
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
   font-size: 0.95rem;
 }
+/* Override the global td rule with more specificity */
+#resources-table td,
+table#resources-table td {
+  white-space: normal !important;
+}
 
-th, td {
+/* Except for the actions column */
+#resources-table td:last-child,
+table#resources-table td:last-child {
+  white-space: nowrap !important;
+}
+
+
+th,
+td {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #DDD;
@@ -218,9 +238,7 @@ section h1 {
   nav ul {
     grid-template-columns: 1fr;
   }
-} 
-
-
+}
 
 /* === Dark Mode - User Controlled === */
 body.dark-mode {
@@ -273,49 +291,48 @@ body.dark-mode tr:hover {
   background-color: #3a3a3a;
 }
 
-body.dark-mode th, 
+body.dark-mode th,
 body.dark-mode td {
   border-bottom-color: #555;
 }
 
 /* Dark Mode Toggle Button */
 .dark-mode-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    padding: 8px 15px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
 }
 
 .dark-mode-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
 }
 
 /*  Dark Mode */
 body.dark-mode .dark-mode-btn {
-    background: rgba(0, 0, 0, 0.3);
-    border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 td .buttons-container {
-    display: flex;
-    gap: 8px;
+  display: flex;
+  gap: 8px;
 }
 
 td {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 td button {
-    display: inline-block;
-    margin: 0 5px;
+  display: inline-block;
+  margin: 0 5px;
 }
-

@@ -1,5 +1,12 @@
 <?php
-/**
+
+session_start();
+
+// Initialize session if not already
+if (!isset($_SESSION['initialized'])) {
+    $_SESSION['initialized'] = true;
+}
+
  * Student Management API
  * 
  * This is a RESTful API that handles all CRUD operations for student management.
@@ -223,7 +230,7 @@ function createStudent($db, $data) {
     // TODO: Check if student_id or email already exists
     // Prepare and execute a SELECT query to check for duplicates
     // If duplicate found, return error response with 409 status (Conflict)
-    $checkSql = "SELECT id FROM students WHERE student_id = :student_id OR email = :email";
+    $checkSql = "SELECT id FROM users WHERE student_id = :student_id OR email = :email";
         $checkStmt = $db->prepare($checkSql);
         $checkStmt->bindParam(':student_id', $student_id);
         $checkStmt->bindParam(':email', $email);
@@ -310,7 +317,7 @@ function updateStudent($db, $data) {
     // TODO: Check if student exists
     // Prepare and execute a SELECT query to find the student
     // If not found, return error response with 404 status
-    $checkSql = "SELECT id FROM students WHERE student_id = :student_id";
+    $checkSql = "SELECT id FROM users WHERE student_id = :student_id";
         $checkStmt = $db->prepare($checkSql);
         $checkStmt->bindParam(':student_id', $student_id);
         $checkStmt->execute();
@@ -348,7 +355,7 @@ function updateStudent($db, $data) {
                 return;
             }
             
-            $emailCheckSql = "SELECT id FROM students WHERE email = :email AND student_id != :student_id";
+            $emailCheckSql = "SELECT id FROM users WHERE email = :email AND student_id != :student_id";
             $emailCheckStmt = $db->prepare($emailCheckSql);
             $emailCheckStmt->bindParam(':email', $email);
             $emailCheckStmt->bindParam(':student_id', $student_id);
@@ -433,7 +440,7 @@ function deleteStudent($db, $studentId) {
     // TODO: Check if student exists
     // Prepare and execute a SELECT query
     // If not found, return error response with 404 status
-    $checkSql = "SELECT id FROM students WHERE student_id = :student_id";
+    $checkSql = "SELECT id FROM users WHERE student_id = :student_id";
         $checkStmt = $db->prepare($checkSql);
         $checkStmt->bindParam(':student_id', $studentId);
         $checkStmt->execute();
@@ -555,7 +562,7 @@ function changePassword($db, $data) {
     
     // TODO: Update password in database
     // Prepare UPDATE query
-    $updateSql = "UPDATE students SET password = :password WHERE student_id = :student_id";
+    $updateSql = "UPDATE users SET password = :password WHERE student_id = :student_id";
     
     // TODO: Bind parameters and execute
     $updateStmt = $db->prepare($updateSql);

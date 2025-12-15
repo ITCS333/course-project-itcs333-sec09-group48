@@ -86,7 +86,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 // TODO: Get the request body for POST and PUT requests
 // Use file_get_contents('php://input') to get raw POST data
 // Decode JSON data using json_decode() with associative array parameter
-$rawBody = json_decode(file_get_contents('php://input'), true);
+$data = json_decode(file_get_contents('php://input'), true);
 
 // TODO: Parse query parameters
 // Get 'action', 'id', 'resource_id', 'comment_id' from $_GET
@@ -271,7 +271,7 @@ function createResource($db, $data)
 
     // TODO: Prepare INSERT query
     // INSERT INTO resources (title, description, link) VALUES (?, ?, ?)
-    $insertRes = " Insert INTO resources (title  description, link) VALUES (:title, :description, :link)";
+    $insertRes = " Insert INTO resources (title, description, link) VALUES (:title, :description, :link)";
     $stInsertResource = $db->prepare($insertRes);
 
     // TODO: Bind parameters
@@ -380,9 +380,9 @@ function updateResource($db, $data)
     }
     // TODO: Build the complete UPDATE SQL query
     // UPDATE resources SET field1 = ?, field2 = ? WHERE id = ?
-   $sqlUpdate = "UPDATE resource SET " . implode(', ' , $toUpdate) . "WHERE id= :id";
+    $sqlUpdate = "UPDATE resource SET " . implode(', ', $toUpdate) . "WHERE id= :id";
     $para[':id'] = $resourceId;
-    
+
 
     // TODO: Prepare the query
     $stUpdate = $db->prepare($sqlUpdate);
@@ -405,8 +405,8 @@ function updateResource($db, $data)
             'message' => 'Resource updated successfully'
         ], 200);
     } else {
-        
-        sendError('Failed to update',500);
+
+        sendError('Failed to update', 500);
     }
 }
 
@@ -430,11 +430,11 @@ function deleteResource($db, $resourceId)
     // TODO: Validate that resource ID is provided and is numeric
     // If not, return error response with 400 status
     if (!isset($resourceId) || !is_numeric($resourceId)) {
-        
-        sendError('Resource ID is required and must be numeric',400);
+
+        sendError('Resource ID is required and must be numeric', 400);
         return;
     }
-    
+
     // TODO: Check if resource exists
     // Prepare and execute a SELECT query
     // If not found, return error response with 404 status
@@ -442,9 +442,9 @@ function deleteResource($db, $resourceId)
     $stCheckD = $db->prepare($sqlCheckD);
     $stCheckD->bindParam(':id', $resourceId);
     $stCheckD->execute();
-    
-    if (!$stCheckD->fetch()){
-        sendError('Resource not found',404);
+
+    if (!$stCheckD->fetch()) {
+        sendError('Resource not found', 404);
         return;
     }
 
@@ -490,7 +490,7 @@ function deleteResource($db, $resourceId)
         $db->rollBack();
 
         // TODO: Return error response with 500 status
-        sendError('Failed to delete ',500);
+        sendError('Failed to delete ', 500);
         return;
     }
 }
@@ -516,7 +516,7 @@ function getCommentsByResourceId($db, $resourceId)
     // TODO: Validate that resource_id is provided and is numeric
     // If not, return error response with 400 status
     if (!isset($resourceId) || !is_numeric($resourceId)) {
-        sendError('Resource ID is required and must be numeric',400);
+        sendError('Resource ID is required and must be numeric', 400);
     }
 
     // TODO: Prepare SQL query to select comments for the resource
@@ -528,7 +528,7 @@ function getCommentsByResourceId($db, $resourceId)
             FROM comments 
             WHERE resource_id = :resourceId 
             ORDER BY created_at ASC";
-    
+
 
     // TODO: Bind the resource_id parameter
     $stmt = $db->prepare($sql);
@@ -573,67 +573,65 @@ function createComment($db, $data)
     $validation = validateRequiredFields($data, $requiredF);
     if (!$validation['valid']) {
         $missingFields = join(', ', $validation['missing']);
-         sendError("Missing required fields: $missingFields" ,400);
-            return;
-        
-    }
-    
-    }
-
-    // TODO: Validate that resource_id is numeric
-    // If not, return error response with 400 status
-    if (!is_numeric($data['resource_id'])) {
-        sendError('Error',400);
-    }
-    $resourceId = $data['resource_id'];
-
-    // TODO: Check if the resource exists
-    // Prepare and execute SELECT query on resources table
-    // If resource not found, return error response with 404 status
-    $sqlCheckE = "SELECT id FROM resources WHERE id = :id";
-    $stmtCheckE = $db->prepare($sqlCheckE);
-    $stmtCheckE->bindParam(':id', $resourceId);
-    $stmtCheckE->execute();
-    if(!$stmtCheckE ->fetch()){
-        sendError('Resource not found',404);
+        sendError("Missing required fields: $missingFields", 400);
         return;
     }
+}
 
-    // TODO: Sanitize input data
-    // Trim whitespace from author and text
-    $Author = sanitizeInput($data['author']);
-    $Text = sanitizeInput($data['text']);
+// TODO: Validate that resource_id is numeric
+// If not, return error response with 400 status
+if (!is_numeric($data['resource_id'])) {
+    sendError('Error', 400);
+}
+$resourceId = $data['resource_id'];
 
-    // TODO: Prepare INSERT query
-    // INSERT INTO comments (resource_id, author, text) VALUES (?, ?, ?)
-    $sqlInsertC = "INSERT INTO comments (resource_id, author, text) VALUES (:resourceId, :author, :text)";
-    
+// TODO: Check if the resource exists
+// Prepare and execute SELECT query on resources table
+// If resource not found, return error response with 404 status
+$sqlCheckE = "SELECT id FROM resources WHERE id = :id";
+$stmtCheckE = $db->prepare($sqlCheckE);
+$stmtCheckE->bindParam(':id', $resourceId);
+$stmtCheckE->execute();
+if (!$stmtCheckE->fetch()) {
+    sendError('Resource not found', 404);
+    return;
+}
 
-    // TODO: Bind parameters
-    // Bind resource_id, author, and text
-    $stmtInsertC = $db->prepare($sqlInsertC);
-    $stmtInsertC->bindParam(':resourceId', $resourceId);
-    $stmtInsertC->bindParam(':author', $Author);
-    $stmtInsertC->bindParam(':text', $Text);
+// TODO: Sanitize input data
+// Trim whitespace from author and text
+$Author = sanitizeInput($data['author']);
+$Text = sanitizeInput($data['text']);
 
-    // TODO: Execute the query
-    $stmtInsertC->execute();
+// TODO: Prepare INSERT query
+// INSERT INTO comments (resource_id, author, text) VALUES (?, ?, ?)
+$sqlInsertC = "INSERT INTO comments (resource_id, author, text) VALUES (:resourceId, :author, :text)";
 
-    // TODO: Check if insert was successful
-    // If yes, get the last inserted ID using $db->lastInsertId()
-    // Return success response with 201 status and the new comment ID
-    // If no, return error response with 500 status
-    if ($stmtInsertC) {
-        $newCommentId = $db->lastInsertId();
-        sendResponse([
-            'success' => true,
-            'message' => 'Comment successfully',
-            'id' => $newCommentId
-        ], 201);
-    } else {
-       sendError('Failed to create cimment',500);
-       return;
-    }
+
+// TODO: Bind parameters
+// Bind resource_id, author, and text
+$stmtInsertC = $db->prepare($sqlInsertC);
+$stmtInsertC->bindParam(':resourceId', $resourceId);
+$stmtInsertC->bindParam(':author', $Author);
+$stmtInsertC->bindParam(':text', $Text);
+
+// TODO: Execute the query
+$stmtInsertC->execute();
+
+// TODO: Check if insert was successful
+// If yes, get the last inserted ID using $db->lastInsertId()
+// Return success response with 201 status and the new comment ID
+// If no, return error response with 500 status
+if ($stmtInsertC) {
+    $newCommentId = $db->lastInsertId();
+    sendResponse([
+        'success' => true,
+        'message' => 'Comment successfully',
+        'id' => $newCommentId
+    ], 201);
+} else {
+    sendError('Failed to create cimment', 500);
+    return;
+}
 
 
 
@@ -654,7 +652,7 @@ function deleteComment($db, $commentId)
     // TODO: Validate that comment_id is provided and is numeric
     // If not, return error response with 400 status
     if (empty($commentId) || !is_numeric($commentId)) {
-        sendError('comment id  is required and must be numeric',400);
+        sendError('comment id  is required and must be numeric', 400);
         return;
     }
 
@@ -665,18 +663,18 @@ function deleteComment($db, $commentId)
     $stmtCheckDC = $db->prepare($sqlCheckDC);
     $stmtCheckDC->bindParam(':id', $commentId);
     $stmtCheckDC->execute();
-    if ($stmtCheckDC->fetch()) {
-        sendError('Comment not found',404);
+    if (!$stmtCheckDC->fetch()) {
+        sendError('Comment not found', 404);
         return;
     }
 
     // TODO: Prepare DELETE query
     // DELETE FROM comments WHERE id = ?
     $sqlDeleteDC = "DELETE FROM comments WHERE id = :id";
-   
+
 
     // TODO: Bind the comment_id parameter
-     $stDeleteDC = $db->prepare($sqlDeleteDC);
+    $stDeleteDC = $db->prepare($sqlDeleteDC);
     $stDeleteDC->bindParam(':id', $commentId);
 
     // TODO: Execute the query
@@ -691,7 +689,7 @@ function deleteComment($db, $commentId)
             'message' => 'Comment deleted successfully'
         ]);
     } else {
-        sendError('Failed to delete',500);
+        sendError('Failed to delete', 500);
     }
 }
 
@@ -703,6 +701,8 @@ function deleteComment($db, $commentId)
 try {
     // TODO: Route the request based on HTTP method and action parameter
     $method = $_SERVER['REQUEST_METHOD'];
+
+
 
     if ($method === 'GET') {
         // TODO: Check the action parameter to determine which function to call 
@@ -788,14 +788,13 @@ try {
     // Return generic error response with 500 status
     // Do NOT expose detailed error messages to the client in production
     error_log("Database error: " . $e->getMessage());
-    sendError('Database error',500);
+    sendError('Database error', 500);
 } catch (Exception $e) {
     // TODO: Handle general errors
     // Log the error message (optional)
     // Return error response with 500 status
     error_log("General error:" . $e->getMessage());
-    sendError('server error',500);
-
+    sendError('server error', 500);
 }
 
 
@@ -827,6 +826,12 @@ function sendResponse($data, $statusCode = 200)
     // TODO: Exit to prevent further execution
     exit;
 }
+function sendError($message, $statusCode = 400)
+{
+    http_response_code($statusCode);
+    echo json_encode(['success' => false, 'message' => $message], JSON_PRETTY_PRINT);
+    exit;
+}
 
 
 /**
@@ -839,7 +844,7 @@ function validateUrl($url)
 {
     // TODO: Use filter_var with FILTER_VALIDATE_URL
     // Return true if valid, false otherwise
-    return filter_var($url , FILTER_VALIDATE_URL) !==false;
+    return filter_var($url, FILTER_VALIDATE_URL) !== false;
 }
 
 
@@ -859,7 +864,7 @@ function sanitizeInput($data)
 
     // TODO: Convert special characters using htmlspecialchars()
     // Use ENT_QUOTES to escape both double and single quotes
-    $data = htmlspecialchars($data, ENT_QUOTES ,'UTF-8');
+    $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
 
     // TODO: Return sanitized data
     return $data;
@@ -886,15 +891,13 @@ function validateRequiredFields($data, $requiredFields)
             $missingFields[] = $misField;
         }
     }
-    if(!empty($missingFields)){
-        sendError('Misssing required dields : '.implode(",",$missingFields));
-    }
+   
 
     // TODO: Return result array
     // ['valid' => (count($missing) === 0), 'missing' => $missing]
-    
+
     return [
-        'valid'   => count($missingFields)===0,
+        'valid'   => count($missingFields) === 0,
         'missing' => $missingFields
     ];
 }
