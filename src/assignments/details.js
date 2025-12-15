@@ -143,7 +143,7 @@ function renderComments() {
 /**
  * Handle adding a new comment
  */
-function handleAddComment(event) {
+async function handleAddComment(event) {
   event.preventDefault();
   const commentText = newCommentText.value.trim();
   
@@ -152,41 +152,55 @@ function handleAddComment(event) {
     return;
   }
   
-  // Create new comment object
   const newComment = {
-    author: 'Student',
-    text: commentText,
     assignment_id: currentAssignmentId,
-    timestamp: new Date().toISOString()
+    author: 'Student',
+    text: commentText
   };
   
-  // Add to local array
-  currentComments.push(newComment);
-  
-  // Re-render comments
-  renderComments();
-  
-  // Clear form
-  newCommentText.value = '';
-  
-  // Show success message
-  const successMsg = document.createElement('div');
-  successMsg.className = 'success-message';
-  successMsg.textContent = 'Comment posted successfully!';
-  commentForm.parentNode.insertBefore(successMsg, commentForm);
-  
-  setTimeout(() => {
-    if (successMsg.parentNode) {
-      successMsg.parentNode.removeChild(successMsg);
+  try {
+    const response = await fetch('api/?resource=comments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        assignment_id: newComment.assignment_id,
+        author: newComment.author,
+        text: newComment.text
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      currentComments.push({
+        id: result.data.id,
+        author: result.data.author,
+        text: result.data.text,
+        created_at: result.data.created_at
+      });
+      
+      renderComments();
+      newCommentText.value = '';
+      
+      const successMsg = document.createElement('div');
+      successMsg.className = 'success-message';
+      successMsg.textContent = 'Comment posted successfully!';
+      commentForm.parentNode.insertBefore(successMsg, commentForm);
+      
+      setTimeout(() => {
+        if (successMsg.parentNode) {
+          successMsg.parentNode.removeChild(successMsg);
+        }
+      }, 3000);
+    } else {
+      alert('Failed to post comment: ' + result.message);
     }
-  }, 3000);
-  
-  // In a real app, you would send this to the server:
-  // fetch('api/comments.php', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(newComment)
-  // })
+  } catch (error) {
+    console.error('Error posting comment:', error);
+    alert('Failed to post comment. Please try again.');
+  }
 }
 
 /**
@@ -220,7 +234,7 @@ async function initializePage() {
     // Try to load from PHP API first
     try {
       // Load assignment data from PHP API
-      const assignmentRes = await fetch(`api.php?resource=assignments&id=${currentAssignmentId}`);
+      const assignmentRes = await fetch(`api/?resource=assignments&id=${currentAssignmentId}`);
       
       if (assignmentRes.ok) {
         const assignmentData = await assignmentRes.json();
@@ -228,7 +242,7 @@ async function initializePage() {
           currentAssignment = assignmentData.data;
           
           // Load comments from PHP API
-          const commentsRes = await fetch(`api.php?resource=comments&assignment_id=${currentAssignmentId}`);
+          const commentsRes = await fetch(`api/?resource=comments&assignment_id=${currentAssignmentId}`);
           if (commentsRes.ok) {
             const commentsData = await commentsRes.json();
             if (commentsData.success) {

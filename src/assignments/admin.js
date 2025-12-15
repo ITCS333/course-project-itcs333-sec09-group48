@@ -93,7 +93,7 @@ function renderTable() {
  * 5. Call `renderTable()` to refresh the list.
  * 6. Reset the form.
  */
-function handleAddAssignment(event) {
+async function handleAddAssignment(event) {
     event.preventDefault();
     
     const title = document.getElementById('assignment-title').value;
@@ -106,22 +106,50 @@ function handleAddAssignment(event) {
         return;
     }
     
-    // Convert files text (one per line) to array
     const files = filesInput 
         ? filesInput.split('\n').map(line => line.trim()).filter(line => line !== '')
         : [];
     
     const newAssignment = {
-        id: `asg_${Date.now()}`,
         title,
         description,
-        dueDate,
+        due_date: dueDate,
         files
     };
     
-    assignments.push(newAssignment);
-    renderTable();
-    assignmentForm.reset();
+    try {
+        const response = await fetch('api/?resource=assignments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title: newAssignment.title,
+                description: newAssignment.description,
+                due_date: newAssignment.due_date,
+                files: newAssignment.files
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            assignments.push({
+                id: result.data.id,
+                title: result.data.title,
+                description: result.data.description,
+                dueDate: result.data.due_date,
+                files: result.data.files || []
+            });
+            renderTable();
+            assignmentForm.reset();
+        } else {
+            alert('Failed to create assignment: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error creating assignment:', error);
+        alert('Failed to create assignment. Please try again.');
+    }
 }
 
 /**
@@ -134,13 +162,33 @@ function handleAddAssignment(event) {
  * with the matching ID (in-memory only).
  * 4. Call `renderTable()` to refresh the list.
  */
-function handleTableClick(event) {
+async function handleTableClick(event) {
     const target = event.target;
     
     if (target.classList.contains('delete-btn')) {
         const id = target.getAttribute('data-id');
-        assignments = assignments.filter(a => a.id !== id);
-        renderTable();
+        
+        if (!confirm('Are you sure you want to delete this assignment?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`api/?resource=assignments&id=${id}`, {
+                method: 'DELETE'
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                assignments = assignments.filter(a => a.id !== id && a.id !== parseInt(id));
+                renderTable();
+            } else {
+                alert('Failed to delete assignment: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error deleting assignment:', error);
+            alert('Failed to delete assignment. Please try again.');
+        }
     }
     
     if (target.classList.contains('edit-btn')) {
@@ -191,7 +239,7 @@ function editAssignment(id) {
     }
 }
 
-function updateAssignment(id) {
+async function updateAssignment(id) {
     const title = document.getElementById('assignment-title').value;
     const description = document.getElementById('assignment-description').value;
     const dueDate = document.getElementById('assignment-due-date').value;
@@ -206,19 +254,43 @@ function updateAssignment(id) {
         ? filesInput.split('\n').map(line => line.trim()).filter(line => line !== '')
         : [];
     
-    const index = assignments.findIndex(a => a.id === id);
-    if (index !== -1) {
-        assignments[index] = {
-            ...assignments[index],
-            title,
-            description,
-            dueDate,
-            files
-        };
+    try {
+        const response = await fetch('api/?resource=assignments', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: id,
+                title,
+                description,
+                due_date: dueDate,
+                files
+            })
+        });
         
-        renderTable();
-        resetForm();
-        alert('Assignment updated successfully!');
+        const result = await response.json();
+        
+        if (result.success) {
+            const index = assignments.findIndex(a => a.id === id || a.id === parseInt(id));
+            if (index !== -1) {
+                assignments[index] = {
+                    ...assignments[index],
+                    title,
+                    description,
+                    dueDate,
+                    files
+                };
+            }
+            renderTable();
+            resetForm();
+            alert('Assignment updated successfully!');
+        } else {
+            alert('Failed to update assignment: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error updating assignment:', error);
+        alert('Failed to update assignment. Please try again.');
     }
 }
 
@@ -252,54 +324,41 @@ function resetForm() {
  */
 async function loadAndInitialize() {
     try {
-        const response = await fetch('api/assignments.json');
+        const response = await fetch('api/?resource=assignments');
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        assignments = await response.json();
+        const result = await response.json();
         
-        // Verify assignments is an array
-        if (!Array.isArray(assignments)) {
-            console.warn('assignments.json does not contain an array');
+        if (result.success && Array.isArray(result.data)) {
+            assignments = result.data.map(a => ({
+                id: a.id,
+                title: a.title,
+                description: a.description,
+                dueDate: a.due_date,
+                files: a.files || []
+            }));
+        } else {
             assignments = [];
         }
         
         renderTable();
         
-        // Add event listeners
         assignmentForm.addEventListener('submit', handleAddAssignment);
         assignmentsTableBody.addEventListener('click', handleTableClick);
         
     } catch (error) {
         console.error('Error loading assignments:', error);
         
-        // Fallback data
-        assignments = [
-            {
-                id: "asg_1",
-                title: "Assignment 1: HTML Basics",
-                description: "Create a semantic HTML structure for a personal portfolio. Focus on using tags like <header>, <nav>, <main>, <article>, and <footer>.",
-                dueDate: "2025-11-10",
-                files: ["portfolio-requirements.pdf", "examples.zip"]
-            },
-            {
-                id: "asg_2",
-                title: "Assignment 2: CSS Styling",
-                description: "Style your HTML portfolio using modern CSS. You must use Flexbox or Grid for layout and include at least one CSS animation.",
-                dueDate: "2025-11-17",
-                files: ["style-guide.pdf"]
-            }
-        ];
-        
+        assignments = [];
         renderTable();
         
-        // Still add event listeners
         assignmentForm.addEventListener('submit', handleAddAssignment);
         assignmentsTableBody.addEventListener('click', handleTableClick);
         
-        alert('Could not load assignments from file. Using default assignments.');
+        console.log('Could not load assignments from API. Starting with empty list.');
     }
 }
 
