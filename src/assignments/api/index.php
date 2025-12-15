@@ -63,23 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // Initialize session if needed
 session_start();
-// Initialize session if needed
-if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 'api_user_' . time(); // Create a unique user ID
-    $_SESSION['authenticated'] = true;
-    $_SESSION['last_api_call'] = date('Y-m-d H:i:s');
-}
-//Add a function to check session/auth
-function checkAuthentication() {
-    if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
-        http_response_code(401);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Authentication required. Please log in.'
-        ]);
-        exit();
-    }
-}
 
 // ============================================================================
 // DATABASE CONNECTION
