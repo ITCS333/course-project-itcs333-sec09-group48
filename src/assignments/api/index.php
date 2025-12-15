@@ -69,6 +69,17 @@ if (!isset($_SESSION['user_id'])) {
     $_SESSION['authenticated'] = true;
     $_SESSION['last_api_call'] = date('Y-m-d H:i:s');
 }
+//Add a function to check session/auth
+function checkAuthentication() {
+    if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Authentication required. Please log in.'
+        ]);
+        exit();
+    }
+}
 
 // ============================================================================
 // DATABASE CONNECTION
