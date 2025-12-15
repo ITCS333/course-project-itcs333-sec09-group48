@@ -1,9 +1,13 @@
 <?php
 
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
+session_start();
+
 $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+
+//idk just put it here
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = 'default_user_' . uniqid();
+}
 
 /**
  * Assignment Management API
