@@ -42,7 +42,7 @@ class test_assignments extends TestCase
             self::$phpFileContent,
             'header() function call should exist in the PHP file'
         );
-    }
+    );}
 
     /**
      * @group TASK4303
@@ -90,7 +90,7 @@ class test_assignments extends TestCase
             self::$phpFileContent,
             'file_get_contents() should be used to read request body'
         );
-    }
+    );}
 
      /**
      * @group TASK4307
@@ -114,7 +114,7 @@ class test_assignments extends TestCase
             self::$phpFileContent,
             'json_decode() should be used to parse JSON data'
         );
-    }
+    );}
 
      /**
      * @group TASK4309
@@ -126,7 +126,7 @@ class test_assignments extends TestCase
             self::$phpFileContent,
             'filter_var() should be used for server-side validation'
         );
-    }
+    );}
 
      /**
      * @group TASK4310
@@ -150,7 +150,7 @@ class test_assignments extends TestCase
             self::$phpFileContent,
             'PDO prepare() method should be used for prepared statements'
         );
-    }
+    );}
 
      /**
      * @group TASK4312
@@ -162,7 +162,7 @@ class test_assignments extends TestCase
             self::$phpFileContent,
             'PDO execute() method should be called to run prepared statement'
         );
-    }
+    );}
 
      /**
      * @group TASK4313
@@ -174,7 +174,7 @@ class test_assignments extends TestCase
             self::$phpFileContent,
             'PDO fetch() method should be used to get user data'
         );
-    }
+    );}
 
      /**
      * @group TASK4314
@@ -186,7 +186,7 @@ class test_assignments extends TestCase
             self::$phpFileContent,
             'password_verify() should be used to check password'
         );
-    }
+    );}
 
      /**
      * @group TASK4315
@@ -210,7 +210,7 @@ class test_assignments extends TestCase
             self::$phpFileContent,
             'json_encode() should be used to create JSON responses'
         );
-    }
+    );}
 
      /**
      * @group TASK4317
