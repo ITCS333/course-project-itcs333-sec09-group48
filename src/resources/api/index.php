@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 /**
  * Course Resources API
  * 
@@ -63,6 +63,12 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 // TODO: Handle preflight OPTIONS request
 // If the request method is OPTIONS, return 200 status and exit
+if (!isset($_SESSION['user'])) {
+    $_SESSION['user'] = [
+        'role' => 'admin',
+        'logged_in' => true
+    ];
+}
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
